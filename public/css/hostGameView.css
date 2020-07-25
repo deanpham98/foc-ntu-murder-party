@@ -297,3 +297,24 @@ img {
     font-size: 20px;
     resize: none;
 }
+
+#theAvengers img {
+    height: 250px;
+    margin-top: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.avenger-wrapper {
+    position: relative;
+    text-align: center;
+}
+
+.avenger-killed {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 100px;
+    transform: translate(-50%, -50%);
+    display: none;
+}

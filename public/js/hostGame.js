@@ -164,7 +164,6 @@ socket.on('nextKillingFloor', function (data, players) {
 });
 
 socket.on("beforeStartKillingSubmit", async function(name) {
-    console.log("beforeStartKillingSubmit: " + name);
     wait--;
     let waitList = document.getElementById("killingFloorWait").value.split("\n");
     for (let i = 0; i < waitList.length; i++) {
@@ -198,10 +197,8 @@ function handleStartKillingClick() {
         });
     } else if (challengeData.id == 4) {
         document.getElementById("challenge4").firstElementChild.style.display = "none";
-    } else if (challengeData.id == 7) {
-        document.getElementById("challenge7").firstElementChild.style.display = "none";
-
     }
+
     killingUpdateTimer(20);
 }
 
@@ -211,9 +208,8 @@ socket.on("updateChallengeValues", function(data) {
     }
 });
 
-socket.on("challengeOver", function(challengeDeadPlayers) {
+socket.on("challengeOverHost", function(challengeDeadPlayers) {
     clearInterval(timer);
-    console.log(challengeDeadPlayers);
     for (let player of allPlayers) {
         if (challengeDeadPlayers.includes(player)) {
             document.getElementById(`${player}Game`).innerText += " 💀"
@@ -236,7 +232,7 @@ socket.on("challengeFourHint", function(password, hint) {
     let showHint = "";
     for (let i = 0; i < 4; i++) {
         if (hint == i + 1) {
-            showHint += password[i];
+            showHint += `${password[i]} `;
         } else {
             showHint += "_ ";
         }
@@ -248,14 +244,18 @@ socket.on("challengeFourPassword", function(password) {
     document.getElementById("password").innerText = `${password[0]} ${password[1]} ${password[2]} ${password[3]}`
 });
 
-socket.on("challengeSevenShowAvenger", function(avenger) {
-    
+socket.on("challengeSevenShowAvenger", function(avenger, guess) {
+    for (let child of document.getElementById("theAvengers").children) {
+        if (child.lastElementChild.id != avenger)
+            child.lastElementChild.style.opacity = 0.2;
+        if (guess.includes(child.lastElementChild.id))
+            child.firstElementChild.style.display = "block";
+    }
 });
 
 socket.on("challengeEightShowHide", function(data) {
     document.getElementById("skew").style.display = "none";
     document.getElementById("skewResult").style.display="block";
-    console.log(data);
     for (let { name, row, col } of data) {
         let elem = document.querySelector(`.hide.row-${row}.col-${col}`);
         elem.innerText = name;
@@ -264,7 +264,6 @@ socket.on("challengeEightShowHide", function(data) {
 });
 
 socket.on("challengeEightShowSkew", function(data) {
-    console.log(data);
     for  (let sword of data) {
         let dir;
         let pos;

@@ -314,7 +314,7 @@ function displayPlayer(isKillingFloor, disp) {
     Array.from(elems).forEach(elem => elem.style.display = disp);
 }
 
-socket.on("challengeOver", function(challengeId, value) {
+socket.on("challengeOverPlayer", function(challengeId, value) {
     document.getElementById(`challenge${challengeId}`).style.display = "none";
     if ((isAlive && !correct) ^ (challengeId == 4 || challengeId == 7)) {
         if (!challengeDone && isAlive) {
