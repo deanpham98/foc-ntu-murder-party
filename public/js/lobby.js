@@ -4,7 +4,6 @@ var socket = io();
 socket.on('connect', function() {
     
     var params = jQuery.deparam(window.location.search); //Gets data from url
-    
     //Tell server that it is player connection
     socket.emit('player-join', params);
 });

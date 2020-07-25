@@ -66,6 +66,7 @@ body {
     color: white;
 }
 #host{
+    display: none;
     color: white;
     text-decoration: none;
 }

@@ -1,26 +1,224 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Game | KahootClone</title>
+        <title>NTU Murder Party</title>
         <link rel = "stylesheet" href = "../../css/playerGameView.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     </head>
-    <body>
+    <body style="font-family: 'Raleway', sans-serif;">
         <div id = "stats">
             <h4 id = "nameText">Name: </h4>
             <h4 id = "scoreText">Score: </h4>
-            <h4 id = "rankText"></h4>
+            <h4 id = "liveness">Life Status: You are alive 👌</h4>
+        </div>
+        <div id = "killingFloor">
+            <div id = "challenge1">
+                <form id = "pickNumber">
+                    <label for="challenge1Input">Pick a Number</label>
+                    <input id="challenge1Input" type = "number" min = "0" max = "1000" required autofocus/>
+                    <br>
+                    <button onclick="challengeOnePickNumber(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id = "challenge2">
+                <form id = "doMath">
+                    <label for="mathAns" id="mathQuestion"></label>
+                    <input id="mathAns" type = "number" required autofocus/>
+                    <br>
+                    <button onclick="challengeTwoSubmit(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id = "challenge3">
+                <form class="non-killing-floor">
+                    <label for="poison">Choose one to Poison</label>
+                    <select id="poison" autofocus>
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                        <option value=5>5</option>
+                        <option value=6>6</option>
+                        <option value=7>7</option>
+                        <option value=8>8</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeThreePoison(); return false;">Submit</button>
+                </form>
+                <form class="killing-floor">
+                    <label for="drink">Choose one to Drink</label>
+                    <select  id="drink" autofocus>
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                        <option value=5>5</option>
+                        <option value=6>6</option>
+                        <option value=7>7</option>
+                        <option value=8>8</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeThreeDrink(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id = "challenge4">
+                <form class="killing-floor">
+                    <label for="password">Create Your Password</label>
+                    <input id="password" type="text" pattern="[a-zA-Z]{4}" required autofocus>
+                    <br>
+                    <select id="hint">
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeFourCreatePassword(); return false;">Submit</button>
+                </form>
+                <form class="non-killing-floor">
+                    <label for="guess">Guess The Password</label>
+                    <input id="guess" type="text" pattern="[a-zA-Z]{4}" required autofocus>
+                    <br>
+                    <button onclick="challengeFourGuess(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id="challenge5" style="height:100%">
+                <button style="float:left; width:50%; height:100%; font-size: 30px; color: white;" onclick="takeMoney(true)" id="takeMoney" class="button">Take Money</button>
+                <button style="float:right; width:50%; height:100%; font-size: 30px; color: white;" onclick="takeMoney(false)" id="takeNothing" class="button">Take Nothing</button>
+            </div>
+            <div id="challenge6">
+                <form>
+                    <label for="spell">Find the Longest Word</label>
+                    <input id="spell" type="text" pattern="[a-zA-Z]{2,25}" required autofocus>
+                    <br>
+                    <button onclick="challengeSixSpell(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id="challenge7">
+                <form class="killing-floor">
+                    <label for="avenger">Which Avenger Are You?</label>
+                    <select id="avenger">
+                        <option value="Iron Man" selected>Iron Man</option>
+                        <option value="Thor">Thor</option>
+                        <option value="Hulk">Hulk</option>
+                        <option value="Captain America">Captain America</option>
+                        <option value="Spider Man">Spider Man</option>
+                        <option value="Ant Man">Ant Man</option>
+                        <option value="Star Lord">Star Lord</option>
+                        <option value="Groot">Groot</option>
+                        <option value="Black Panther">Black Panther</option>
+                        <option value="Vision">Vision</option>
+                        <option value="Scarlet Witch">Sarlet Witch</option>
+                        <option value="Black Widow">Black Widow</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeSevenAvenger(); return false;">Submit</button>
+                </form>
+                <form class="non-killing-floor">
+                    <label for="guessAvenger">Kill The Avenger</label>
+                    <select id="guessAvenger">
+                        <option value="Iron Man" selected>Iron Man</option>
+                        <option value="Thor">Thor</option>
+                        <option value="Hulk">Hulk</option>
+                        <option value="Captain America">Captain America</option>
+                        <option value="Spider Man">Spider Man</option>
+                        <option value="Ant Man">Ant Man</option>
+                        <option value="Star Lord">Star Lord</option>
+                        <option value="Groot">Groot</option>
+                        <option value="Black Panther">Black Panther</option>
+                        <option value="Vision">Vision</option>
+                        <option value="Scarlet Witch">Sarlet Witch</option>
+                        <option value="Black Widow">Black Widow</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeSevenGuess(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id="challenge8">
+                <form id="hide" class="killing-floor">
+                    <label for="row">Row Number</label>
+                    <select id="row">
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                    </select>
+                    <br>
+                    <label for="col">Column number</label>
+                    <select id="col">
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                        <option value=5>5</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeEightHide(); return false;">Submit</button>
+                </form>
+                <form id="skew" class="non-killing-floor">
+                    <label for="hole">Choose a hole to skew</label>
+                    <select id="hole">
+                        <option value=1 selected>1</option>
+                        <option value=2>2</option>
+                        <option value=3>3</option>
+                        <option value=4>4</option>
+                        <option value=5>5</option>
+                        <option value=6>6</option>
+                        <option value=7>7</option>
+                        <option value=8>8</option>
+                        <option value=9>9</option>
+                        <option value=10>10</option>
+                        <option value=11>11</option>
+                        <option value=12>12</option>
+                        <option value=13>13</option>
+                    </select>
+                    <br>
+                    <button onclick="challengeEightSkew(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id="challenge9" class="flex-container">
+                <form>
+                    <label for="challenge9Option">Which One?</label>
+                    <select id="challenge9Option" onchange="checkIfKill()">
+                        <option value="corona">Corona</option>
+                        <option value="mask">Mask</option>
+                        <option value="money">Money</option>
+                    </select>
+                    <br>
+                    <label for="whoToKill">Who to Kill?</label>
+                    <select id="whoToKill">
+
+                    </select>
+                    <br>
+                    <button onclick="challengeNineSubmit(); return false;">Submit</button>
+                </form>
+            </div>
+            <div id="challenge10">
+
+            </div>
+            <div id="challenge11">
+
+            </div>
+            <div id="challenge12">
+                
+            </div>
+            <div id = "lifeStatus" style="font-size:30px; color:white; text-align: center; margin: 30px; display: none;">
+
+            </div>
         </div>
         <h2 id = "message"></h2>
-        <button onclick = "answerSubmitted(1)" id = "answer1" class = "button"></button>
-        <button onclick = "answerSubmitted(2)" id = "answer2" class = "button"></button>
-        <br>
-        <button onclick = "answerSubmitted(3)" id = "answer3" class = "button"></button>
-        <button onclick = "answerSubmitted(4)" id = "answer4" class = "button"></button>
+        <div id = "answerButtons" style="height: 100%">
+            <button onclick = "answerSubmitted(1)" id = "answer1">A</button>
+            <button onclick = "answerSubmitted(2)" id = "answer2">B</button>
+            <button onclick = "answerSubmitted(3)" id = "answer3">C</button>
+            <button onclick = "answerSubmitted(4)" id = "answer4">D</button>
+        </div>
+        <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>
         <script src = "../../js/libs/jqueryLibrary.js"></script>
         <script src = "../../js/libs/deparam.js"></script>
+        <script src="../../js/libs/typo.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src = "../../js/playerGame.js"></script>
     </body>
 </html>

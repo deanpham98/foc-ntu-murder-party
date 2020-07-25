@@ -1,41 +1,171 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Game | KahootClone</title>
+        <title>NTU Murder Party</title>
         <link rel = "stylesheet" href = "../../css/hostGameView.css">
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Tajawal" rel="stylesheet">
     </head>
-    <body>
-        <h4 id = "questionNum">Question 1 / x</h4>
-        <h4 id = "playersAnswered">Players Answered: 0 / x</h4>
-        <h3 id = "timerText">Time Left:<span id = "num"> 20</span></h3>
+    <body style="font-family: 'Raleway', sans-serif;">
+        <div id = "questionContext">
+            <div id="playersStats">
+                <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">To-Kill-List</h2>
+                <hr style="border:3px solid #f1f1f1">
+                <ul id="playersNameValue" style="font-size: 16px;"></ul>
+                <hr style="border:3px solid #f1f1f1">
+            </div>
+            
+            <h2 id = "questionNum" style="margin-top: 12px; margin-bottom: 12px;"></h2>
+            <h3 id = "playersAnswered" style="margin-top: 12px; margin-bottom: 12px;"></h3>
+            <h3 id = "timerText" style="margin-top: 12px; margin-bottom: 12px;">Time Left:<span id = "num"> 20</span></h3>
+        </div>
+            
+        <div id = "killingFloor">
+            <div id = "killingFloorPlayers">
+                <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">Killing Floor Players</h2>
+                <hr style="border:3px solid #f1f1f1">
+                <ul id = "challengeNameValue"  style="font-size: 16px;">
+
+                </ul>
+                <hr style="border:3px solid #f1f1f1">
+            </div>
+
+            <div id = "challengeContext">
+                <h2 id = "challengeName" style="text-align: center;"></h2>
+                <h3 id = "killingTimerText" style="text-align: center;">Time Left:<span id = "killingNum"> </span></h3>
+            </div>
+            
+            <div id = "challenge1">
+                <img src="../../media/challenge1.png" alt="Numbers" style="margin-left: auto; margin-right: auto; display:block; height: 300px">
+            </div>
+            <div id = "challenge2">
+                <img src="../../media/challenge2.jpg" alt="Math" style="margin-left:auto; margin-right:auto; display:block; height: 300px">
+            </div>
+            <div id = "challenge3" style="margin:auto; width:635px">
+                <div id = "skull-wrapper">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                    <img class="skull" src="../../media/challenge3_skull.png" alt="Cute Skull">
+                </div>
+                <img style="margin-left:12.5%; margin-right:auto" src="../../media/challenge3.png" alt="Chalices">
+            </div>
+            <div id = "challenge4">
+                <img src="../../media/challenge4.jpeg" alt="Password" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <h1 id="password" style="text-align:center; font-size: 50px;"></h1>
+            </div>
+            <div id = "challenge5">
+                <img src="../../media/challenge5.jpg" alt="Money" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+            </div>
+            <div id = "challenge6">
+                <img src="../../media/challenge6_1.png" alt="Example" id="spellExample" style="margin-left: auto; margin-right: auto; display: block; height: 300px;">
+                <img src="../../media/challenge6_2.png" alt="Real" id="spellReal" style="margin-left: auto; margin-right: auto; height: 300px;">
+            </div>
+            <div id = "challenge7">
+                <img id="ironman" src="../../media/challenge7_ironman.jpg" alt="Ironman" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="thor" src="../../media/challenge7_thor.jpg" alt="Thor" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="hulk" src="../../media/challenge7_hulk.jpg" alt="Hulk" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="captainamerica" src="../../media/challenge7_captainamerica.jpg
+                " alt="Captainamerica" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="spiderman" src="../../media/challenge7_spiderman.jpg" alt="Spiderman" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="antman" src="../../media/challenge7_antman.jpg" alt="Antman" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="starlord" src="../../media/challenge7_starlord.jpg" alt="Starlord" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="groot" src="../../media/challenge7_groot.jpg" alt="Groot" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="blackpanther" src="../../media/challenge7_blackpanther.jpg" alt="Blackpanther" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="vision" src="../../media/challenge7_vision.jpg" alt="Vision" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="scarletwitch" src="../../media/challenge7_scarletwitch.jpeg" alt="Scarletwitch" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+                <img id="blackwidow" src="../../media/challenge7_blackwidow.jpg" alt="Blackwidow" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
+            </div>
+            <div id = "challenge8">
+                <div id="skewResult" style="margin-top: 30px;">
+                    <img src="../../media/challenge8_1.png" alt="Hide" id="hide">
+                    <div class="hide row-1 col-1"></div>
+                    <div class="hide row-1 col-2"></div>
+                    <div class="hide row-1 col-3"></div>
+                    <div class="hide row-1 col-4"></div>
+                    <div class="hide row-1 col-5"></div>
+                    <div class="hide row-2 col-1"></div>
+                    <div class="hide row-2 col-2"></div>
+                    <div class="hide row-2 col-3"></div>
+                    <div class="hide row-2 col-4"></div>
+                    <div class="hide row-2 col-5"></div>
+                    <div class="hide row-3 col-1"></div>
+                    <div class="hide row-3 col-2"></div>
+                    <div class="hide row-3 col-3"></div>
+                    <div class="hide row-3 col-4"></div>
+                    <div class="hide row-3 col-5"></div>
+                    <div class="hide row-4 col-1"></div>
+                    <div class="hide row-4 col-2"></div>
+                    <div class="hide row-4 col-3"></div>
+                    <div class="hide row-4 col-4"></div>
+                    <div class="hide row-4 col-5"></div>
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-left sword-row-1">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword_left sword-row-2">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-left sword-row-3">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-left sword-row-4">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-top sword-col-1">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-top sword-col-2">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-top sword-col-3">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-top sword-col-4">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-top sword-col-5">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-right sword-row-1">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-right sword-row-2">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-right sword-row-3">
+                    <img src="../../media/challenge8_sword.jpg" alt="Sword" class="sword sword-right sword-row-4">
+                </div>
+                <img src="../../media/challenge8_2.png" alt="Skew" id="skew" style="width: 640px; margin-left: auto; margin-right: auto; margin-top: 30px;">
+            </div>
+            <div id="challenge9">
+                <div id="challengeNineExplain" class="flex-container">
+                    <img src="../../media/challenge9_corona.jpg" alt="Corona" style="display:inline-block; width:20%">
+                    <img src="../../media/challenge9_mask.jpg" alt="Mask">
+                    <img src="../../media/challenge9_money.jpg" alt="Money">
+                </div>
+                <div id="challengeNineDisplay">
+                    <div id="challengeNinePlayer" style="font-size:50px;"></div>
+                    <div id="challengeNineTarget" style="font-size:50px"></div>
+                    <div id="playerOption"><img src="../../media/challenge9_corona.jpg" alt="Player Option" style="width:150px;"></div>
+                    <div id="targetOption" style="position:relative">
+                        <img class="hidden" src="../../media/challenge9_safe.jpg" alt="Safe" style="width:250px; position:absolute; left: -50px;">
+                        <img src="../../media/challenge9_corona.jpg" alt="Target Option" style="width:150px;">
+                    </div>
+                    <div id="arrow"><img src="../../media/challenge9_arrow.jpg" alt="Arrow" style="width:300px;"></div>
+                </div>
+            </div>
+            <div id = "challenge10">
+                
+            </div>
+            <div id = "challenge11">
+                
+            </div>
+
+            <div id = "waitList" style="display: none; text-align: center;">
+                <h2>Waiting For</h2>
+                <textarea style = "width: 300px; height: 200px" readonly id="killingFloorWait"></textarea>
+            </div>
+            <button id = "startKillingButton" onclick = "handleStartKillingClick()" style="margin-top: 25px;">Start Killing</button>
+        </div>
         
-        
-        <div class = "square" id = "square1"></div>
-        <div class = "square" id = "square2"></div>
-        <div class = "square" id = "square3"></div>
-        <div class = "square" id = "square4"></div>
-        
-        <h2 id = "question">Question</h2>
-        <h3 id = "answer1">Answer</h3>
-        <br>
-        <h3 id = "answer2">Answer</h3>
-        <br>
-        <h3 id = "answer3">Answer</h3>
-        <br>
-        <h3 id = "answer4">Answer</h3>
-        
-        <br>
-        <button onclick = "nextQuestion()" id = "nextQButton">Next Question</button>
-        
-        <h2 id = "winnerTitle">Top 5 Players</h4>
-        <h3 id = "winner1">1.</h3>
-        <h3 id = "winner2">2.</h3>
-        <h3 id = "winner3">3.</h3>
-        <h3 id = "winner4">4.</h3>
-        <h3 id = "winner5">5.</h3>
-        
+        <div id="questionData">
+            <h3 id = "question">Question</h3>
+            <h4 id = "answer1" class = "answer">Answer</h4>
+            <br>
+            <h4 id = "answer2" class = "answer">Answer</h4>
+            <br>
+            <h4 id = "answer3" class = "answer">Answer</h4>
+            <br>
+            <h4 id = "answer4" class = "answer">Answer</h4>
+            <br>
+        </div>
+        <div id="navigation">
+            <button onclick = "nextQuestion()" id = "nextQButton" style="position: absolute; left: 40%; bottom: 15px">Next Question</button>
+            <button onclick = "killingFloor()" id = "killingFButton" style="position: absolute; left: 40%; bottom: 15px">Killing Floor ^^</button>
+        </div>
+        <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>
         <script src = "../../js/libs/jqueryLibrary.js"></script>
         <script src = "../../js/libs/deparam.js"></script>

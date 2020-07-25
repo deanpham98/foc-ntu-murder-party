@@ -1,192 +1,313 @@
 var socket = io();
-
 var params = jQuery.deparam(window.location.search); //Gets the id from url
-
 var timer;
-
 var time = 20;
+var challengeData = {id: 0};
+var killingFloorPlayers;
+var allPlayers;
+var wait;
+var questionNum = 1;
 
 //When host connects to server
-socket.on('connect', function() {
-    
+socket.on('connect', function () {
+
     //Tell server that it is host connection from game view
     socket.emit('host-join-game', params);
 });
 
-socket.on('noGameFound', function(){
-   window.location.href = '../../';//Redirect user to 'join game' page
+socket.on("allPlayers", function(players) {
+    allPlayers = players;
+    document.getElementById("playersNameValue").innerHTML = allPlayers.map(function(name) {
+        return `<li><div id=${name}Game style="text-align: center;">${name}</div><div id="${name}GameValue" style="text-align: center;">0</div></li>`;
+    }).join("");
 });
 
-socket.on('gameQuestions', function(data){
-    document.getElementById('question').innerHTML = data.q1;
-    document.getElementById('answer1').innerHTML = data.a1;
-    document.getElementById('answer2').innerHTML = data.a2;
-    document.getElementById('answer3').innerHTML = data.a3;
-    document.getElementById('answer4').innerHTML = data.a4;
-    var correctAnswer = data.correct;
-    document.getElementById('playersAnswered').innerHTML = "Players Answered 0 / " + data.playersInGame;
+socket.on('noGameFound', function () {
+    window.location.href = '../../';//Redirect user to 'join game' page
+});
+
+socket.on('gameQuestions', function (data) {
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`answer${i}`).style.opacity = 1;
+    }
+    document.getElementById('question').innerText = data.q1;
+    document.getElementById('answer1').innerText = data.a1;
+    document.getElementById('answer2').innerText = data.a2;
+    document.getElementById('answer3').innerText = data.a3;
+    document.getElementById('answer4').innerText = data.a4;
+    document.getElementById("questionNum").innerText = `Question ${questionNum}`;
+    document.getElementById('playersAnswered').innerText = "Players Answered 0 / " + data.playersInGame;
     updateTimer();
 });
 
-socket.on('updatePlayersAnswered', function(data){
-   document.getElementById('playersAnswered').innerHTML = "Players Answered " + data.playersAnswered + " / " + data.playersInGame; 
+socket.on('updatePlayersAnswered', function (data) {
+    document.getElementById('playersAnswered').innerHTML = `Players Answered ${data.playersAnswered} / ${data.playersInGame}`;
 });
 
-socket.on('questionOver', function(playerData, correct){
+socket.on('questionOverHost', function (correct, isNextQuestion) {
     clearInterval(timer);
-    var answer1 = 0;
-    var answer2 = 0;
-    var answer3 = 0;
-    var answer4 = 0;
-    var total = 0;
+    questionNum++;
     //Hide elements on page
     document.getElementById('playersAnswered').style.display = "none";
     document.getElementById('timerText').style.display = "none";
-    
+
     //Shows user correct answer with effects on elements
-    if(correct == 1){
-        document.getElementById('answer2').style.filter = "grayscale(50%)";
-        document.getElementById('answer3').style.filter = "grayscale(50%)";
-        document.getElementById('answer4').style.filter = "grayscale(50%)";
-        var current = document.getElementById('answer1').innerHTML;
-        document.getElementById('answer1').innerHTML = "&#10004" + " " + current;
-    }else if(correct == 2){
-        document.getElementById('answer1').style.filter = "grayscale(50%)";
-        document.getElementById('answer3').style.filter = "grayscale(50%)";
-        document.getElementById('answer4').style.filter = "grayscale(50%)";
-        var current = document.getElementById('answer2').innerHTML;
-        document.getElementById('answer2').innerHTML = "&#10004" + " " + current;
-    }else if(correct == 3){
-        document.getElementById('answer1').style.filter = "grayscale(50%)";
-        document.getElementById('answer2').style.filter = "grayscale(50%)";
-        document.getElementById('answer4').style.filter = "grayscale(50%)";
-        var current = document.getElementById('answer3').innerHTML;
-        document.getElementById('answer3').innerHTML = "&#10004" + " " + current;
-    }else if(correct == 4){
-        document.getElementById('answer1').style.filter = "grayscale(50%)";
-        document.getElementById('answer2').style.filter = "grayscale(50%)";
-        document.getElementById('answer3').style.filter = "grayscale(50%)";
-        var current = document.getElementById('answer4').innerHTML;
-        document.getElementById('answer4').innerHTML = "&#10004" + " " + current;
-    }
-    
-    for(var i = 0; i < playerData.length; i++){
-        if(playerData[i].gameData.answer == 1){
-            answer1 += 1;
-        }else if(playerData[i].gameData.answer == 2){
-            answer2 += 1;
-        }else if(playerData[i].gameData.answer == 3){
-            answer3 += 1;
-        }else if(playerData[i].gameData.answer == 4){
-            answer4 += 1;
+    for (let i = 1; i <= 4; i++) {
+        if (i != correct) {
+            document.getElementById(`answer${i}`).style.opacity = 0.2;
+        } else {
+            document.getElementById(`answer${i}`).innerText = "✅ " + document.getElementById(`answer${i}`).innerText;
         }
-        total += 1;
     }
-    
-    //Gets values for graph
-    answer1 = answer1 / total * 100;
-    answer2 = answer2 / total * 100;
-    answer3 = answer3 / total * 100;
-    answer4 = answer4 / total * 100;
-    
-    document.getElementById('square1').style.display = "inline-block";
-    document.getElementById('square2').style.display = "inline-block";
-    document.getElementById('square3').style.display = "inline-block";
-    document.getElementById('square4').style.display = "inline-block";
-    
-    document.getElementById('square1').style.height = answer1 + "px";
-    document.getElementById('square2').style.height = answer2 + "px";
-    document.getElementById('square3').style.height = answer3 + "px";
-    document.getElementById('square4').style.height = answer4 + "px";
-    
-    document.getElementById('nextQButton').style.display = "block";
-    
+
+    document.getElementById(`${isNextQuestion ? "nextQButton" : "killingFButton"}`).style.display = "block";
 });
 
-function nextQuestion(){
+socket.on("newScoreHost", function(name, score) {
+    document.getElementById(`${name}GameValue`).innerText = score;
+});
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function nextQuestion() {
+    if (challengeData.id) {
+        document.getElementById(`challenge${challengeData.id}`).style.display = "none";
+        document.getElementById("killingFloor").style.display = "none";
+    }
+
+    document.getElementById("questionNum").innerText = `Question ${questionNum}`;
+    document.getElementById("questionContext").style.display = "block";
+    document.getElementById("killingFButton").style.display = "none";
     document.getElementById('nextQButton').style.display = "none";
-    document.getElementById('square1').style.display = "none";
-    document.getElementById('square2').style.display = "none";
-    document.getElementById('square3').style.display = "none";
-    document.getElementById('square4').style.display = "none";
-    
-    document.getElementById('answer1').style.filter = "none";
-    document.getElementById('answer2').style.filter = "none";
-    document.getElementById('answer3').style.filter = "none";
-    document.getElementById('answer4').style.filter = "none";
-    
+
+    document.getElementById("questionData").style.display = "none";
+
+    socket.emit('nextQuestion');
     document.getElementById('playersAnswered').style.display = "block";
     document.getElementById('timerText').style.display = "block";
     document.getElementById('num').innerHTML = " 20";
-    socket.emit('nextQuestion'); //Tell server to start new question
+    document.getElementById("questionData").style.display = "block";
+    //Tell server to start new question
 }
 
-function updateTimer(){
+function killingFloor() {
+    document.getElementById("killingFButton").style.display = "none";
+
+    document.getElementById("questionData").style.display = "none";
+    document.getElementById("questionContext").style.display = "none";
+
+    socket.emit('killingFloor'); //Tell server to start new question
+}
+
+function updateTimer() {
     time = 20;
-    timer = setInterval(function(){
+    timer = setInterval(function () {
         time -= 1;
         document.getElementById('num').textContent = " " + time;
-        if(time == 0){
+        if (time == 0) {
+            clearInterval(timer);
             socket.emit('timeUp');
         }
     }, 1000);
 }
-socket.on('GameOver', function(data){
-    document.getElementById('nextQButton').style.display = "none";
-    document.getElementById('square1').style.display = "none";
-    document.getElementById('square2').style.display = "none";
-    document.getElementById('square3').style.display = "none";
-    document.getElementById('square4').style.display = "none";
-    
-    document.getElementById('answer1').style.display = "none";
-    document.getElementById('answer2').style.display = "none";
-    document.getElementById('answer3').style.display = "none";
-    document.getElementById('answer4').style.display = "none";
-    document.getElementById('timerText').innerHTML = "";
-    document.getElementById('question').innerHTML = "GAME OVER";
-    document.getElementById('playersAnswered').innerHTML = "";
-    
-    
-    
-    document.getElementById('winner1').style.display = "block";
-    document.getElementById('winner2').style.display = "block";
-    document.getElementById('winner3').style.display = "block";
-    document.getElementById('winner4').style.display = "block";
-    document.getElementById('winner5').style.display = "block";
-    document.getElementById('winnerTitle').style.display = "block";
-    
-    document.getElementById('winner1').innerHTML = "1. " + data.num1;
-    document.getElementById('winner2').innerHTML = "2. " + data.num2;
-    document.getElementById('winner3').innerHTML = "3. " + data.num3;
-    document.getElementById('winner4').innerHTML = "4. " + data.num4; 
-    document.getElementById('winner5').innerHTML = "5. " + data.num5;
+
+function killingUpdateTimer(time) {
+    time++;
+    timer = setInterval(function () {
+        time--;
+        document.getElementById('killingNum').textContent = " " + time;
+        if (time == 0) {
+            clearInterval(timer);
+            document.getElementById("challengeContext").style.display = "none";
+            socket.emit('killingTimeUp');
+            document.getElementById("nextQButton").style.display = "block";
+        }
+    }, 1000);
+}
+
+socket.on('nextKillingFloor', function (data, players) {
+    challengeData = data;
+    killingFloorPlayers = players;
+    if (!([3, 4, 7, 8].includes(challengeData.id))) {
+        document.getElementById("startKillingButton").style.display = "block";
+    } else if (challengeData.id == 3) {
+        let nonKillingFloorPlayers = []
+        for (let p of allPlayers) {
+            if (!(killingFloorPlayers.includes(p))) {
+                nonKillingFloorPlayers.push(p);
+            }
+        }
+        wait = nonKillingFloorPlayers.length;
+        document.getElementById("killingFloorWait").innerHTML = nonKillingFloorPlayers.join("\n");
+        document.getElementById("waitList").style.display = "block";
+    } else {
+        wait = killingFloorPlayers.length;
+        document.getElementById("killingFloorWait").innerHTML = killingFloorPlayers.join("\n");
+        document.getElementById("waitList").style.display = "block";
+    }
+    document.getElementById("killingTimerText").style.display = "none";
+    document.getElementById('questionContext').style.display = "none";
+    document.getElementById("questionData").style.display = "none";
+
+    document.getElementById('challengeName').innerText = `${data.name}`;
+    document.getElementById('killingNum').textContent = "20";
+    document.getElementById("challengeContext").style.display = "block";
+    document.getElementById("challengeNameValue").innerHTML = killingFloorPlayers.map(function(name) {
+        return `<li><div id="${name}Challenge" style="text-align: center;">${name}</div><div id="${name}ChallengeValue" style="text-align: center;">Alive</div></li>`;
+    }).join("");
+
+    document.getElementById("killingFloor").style.display = "block";
+    document.getElementById("killingFloorPlayers").style.display = "block";
+    document.getElementById(`challenge${data.id}`).style.display = "block";
 });
 
+socket.on("beforeStartKillingSubmit", async function(name) {
+    console.log("beforeStartKillingSubmit: " + name);
+    wait--;
+    let waitList = document.getElementById("killingFloorWait").value.split("\n");
+    for (let i = 0; i < waitList.length; i++) {
+        if (waitList[i] == name) {
+            waitList[i] = "✅ " + name;
+            break;
+        }
+    }
 
-
-socket.on('getTime', function(player){
-    socket.emit('time', {
-        player: player,
-        time: time
-    });
+    document.getElementById("killingFloorWait").value =  waitList.join("\n");
+    if (wait == 0) {
+        await(sleep(1000));
+        document.getElementById("waitList").style.display = "none";
+        document.getElementById("startKillingButton").style.display = "block";
+    }
 });
 
+function handleStartKillingClick() {
+    document.getElementById("startKillingButton").style.display = "none";
+    socket.emit("startKilling");
+    document.getElementById("killingTimerText").style.display = "block";
+    if (challengeData.id == 6) {
+        document.getElementById("spellExample").style.display = "none";
+        document.getElementById("spellReal").style.display = "block";
+    } else if (challengeData.id == 8) {
+        document.getElementById("skewResult").style.display = "none";
+        document.getElementById("skew").style.display = "block";
+    } else if (challengeData.id == 2) {
+        killingFloorPlayers.forEach(name => {
+            document.getElementById(`${name}ChallengeValue`).innerText = "0";
+        });
+    } else if (challengeData.id == 4) {
+        document.getElementById("challenge4").firstElementChild.style.display = "none";
+    } else if (challengeData.id == 7) {
+        document.getElementById("challenge7").firstElementChild.style.display = "none";
 
+    }
+    killingUpdateTimer(20);
+}
 
+socket.on("updateChallengeValues", function(data) {
+    for (let { name, value } of data) {
+        document.getElementById(`${name}ChallengeValue`).innerText = value;
+    }
+});
 
+socket.on("challengeOver", function(challengeDeadPlayers) {
+    clearInterval(timer);
+    console.log(challengeDeadPlayers);
+    for (let player of allPlayers) {
+        if (challengeDeadPlayers.includes(player)) {
+            document.getElementById(`${player}Game`).innerText += " 💀"
+        }
+    }
+    document.getElementById("challengeContext").style.display = "none";
+    document.getElementById("nextQButton").style.display = "block";
+});
 
+socket.on("challengeThreeShowPoisons", function(poisons) {
+    let skulls = document.getElementById("skull-wrapper").children;
+    for (let i = 0; i < 8; i++) {
+        if (poisons[i]) {
+            skulls[i].style.visibility = "visible";
+        }
+    }
+});
 
+socket.on("challengeFourHint", function(password, hint) {
+    let showHint = "";
+    for (let i = 0; i < 4; i++) {
+        if (hint == i + 1) {
+            showHint += password[i];
+        } else {
+            showHint += "_ ";
+        }
+    }
+    document.getElementById("password").innerText = showHint;
+});
 
+socket.on("challengeFourPassword", function(password) {
+    document.getElementById("password").innerText = `${password[0]} ${password[1]} ${password[2]} ${password[3]}`
+});
 
+socket.on("challengeSevenShowAvenger", function(avenger) {
+    
+});
 
+socket.on("challengeEightShowHide", function(data) {
+    document.getElementById("skew").style.display = "none";
+    document.getElementById("skewResult").style.display="block";
+    console.log(data);
+    for (let { name, row, col } of data) {
+        let elem = document.querySelector(`.hide.row-${row}.col-${col}`);
+        elem.innerText = name;
+        elem.style.left = `calc(${getComputedStyle(elem).left} + ${(6 - name.length) * 0.25}em)`;
+    }
+});
 
+socket.on("challengeEightShowSkew", function(data) {
+    console.log(data);
+    for  (let sword of data) {
+        let dir;
+        let pos;
+        if (sword <= 4) {
+            dir = "left";
+            pos = `row-${sword}`;
+        } else if (sword <= 9) {
+            dir = "top";
+            pos = `col-${sword-4}`;
+        } else if (sword <= 13) {
+            dir = "right";
+            pos = `row-${sword-9}`
+        }
+        document.querySelector(`.sword.sword-${dir}.sword-${pos}`).style.visibility = "visible";
+        document.querySelector(`.sword.sword-${dir}.sword-${pos}`).classList.add(`sword-${dir}-move`);
+    }
+});
 
-
-
-
-
-
-
-
-
-
+socket.on("challengeNineShowResults", async function(displayData, updateData) {
+    document.getElementById("nextQButton").style.display = "none";
+    document.getElementById("challengeNineExplain").style.display = "none";
+    
+    for (let { player, target, targetOpt } of displayData) {
+        document.getElementById("challengeNinePlayer").innerText = player;
+        document.getElementById("challengeNineTarget").innerText = target;
+        document.getElementById("targetOption").lastElementChild.src = `../../media/challenge9_${targetOpt}.jpg`;
+        document.getElementById("targetOption").firstElementChild.src = `../../media/challenge${targetOpt == "mask" ? "9_safe.jpg" : "3_skull.png"}`;
+        document.getElementById("targetOption").firstElementChild.style.left = targetOpt == "mask" ? "-50px" : "0px";
+        document.getElementById("targetOption").firstElementChild.style.width = targetOpt == "mask" ? "250px" : "150px";
+        document.getElementById("challengeNineDisplay").style.display = "grid";
+        await sleep(2000); 
+        document.getElementById("targetOption").firstElementChild.classList.toggle("hidden");
+        document.getElementById("targetOption").lastElementChild.classList.toggle("hidden");
+        await sleep(2000);
+        document.getElementById("challengeNineDisplay").style.display = "none";
+        document.getElementById("targetOption").firstElementChild.classList.toggle("hidden");
+        document.getElementById("targetOption").lastElementChild.classList.toggle("hidden");
+        await sleep(500);
+    }
+    
+    document.getElementById("challengeNineDisplay").style.display = "none";
+    document.getElementById("nextQButton").style.display = "block";
+    for (let { name, value } of updateData) {
+        document.getElementById(`${name}ChallengeValue`).innerText = value;
+    }
+});
