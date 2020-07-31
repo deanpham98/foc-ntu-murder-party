@@ -6,9 +6,9 @@ socket.on("connect", function() {
     socket.emit("checkHostExist");
 });
 
-socket.on("showHost", function() {
-    document.getElementById("host").style.display = "block";
-});
+// socket.on("showHost", function() {
+//     document.getElementById("host").style.display = "block";
+// });
 
 function validateName() {
     socket.emit("validateName", name.value);

@@ -26,13 +26,15 @@ body {
     -webkit-animation-direction: alternate;
     animation-direction: alternate;
 }
-#title{
+
+#title {
     font-family: 'Raleway', sans-serif;
     text-align: center;
     font-size: 50px;
     color: white;
 }
-#name{
+
+#name {
     width: 50%;
     padding: 12px 0px;
     margin: 8px 0;
@@ -45,7 +47,8 @@ body {
     font-size: 20px;
     text-align: center;
 }
-#pin{
+
+#pin {
     width: 50%;
     padding: 12px 0px;
     margin: 8px 0;
@@ -58,22 +61,26 @@ body {
     font-size: 20px;
     text-align: center;
 }
-#label{
+
+#label {
     display: block;
     text-align: center;
     font-size: 25px;
     font-family: 'Raleway', sans-serif;
     color: white;
 }
-#host{
+
+#host {
     display: none;
     color: white;
     text-decoration: none;
 }
-#host:hover{
+
+#host:hover {
     text-decoration:underline;
 }
-#joinButton{
+
+#joinButton {
     width: 50%;
     background-color: #4CAF50;
     color: white;

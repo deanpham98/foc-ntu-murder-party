@@ -29,6 +29,8 @@ server.listen(3000, () => {
     console.log("Server started on port 3000");
 });
 var uniqueNames;
+let breakoutQuesNum;
+let breakoutPlayers;
 let deadPlayers;
 let incorrectPlayer;
 let challengeId;
@@ -57,8 +59,11 @@ let challengeEightSkew;
 let challengeEightHole;
 let challengeEightDone;
 let challengeNineOptions;
-let interrogationData;
+let challengeElevenImpress;
+let challengeElevenGuessCounter;
+let questionData;
 let allPlayersAnswered;
+let breakoutAllPlayersAnswers;
 let timeUpValue = {
     1: 0,
     2: -1000,
@@ -68,7 +73,8 @@ let timeUpValue = {
     6: "",
     7: "Iron Man",
     8: 1000,
-    9: "mask"
+    9: "mask",
+    11: -1000
 }
 //When a connection to server is made from client
 io.on('connection', (socket) => {
@@ -106,12 +112,12 @@ io.on('connection', (socket) => {
     socket.on('host-join-game', (data) => {
         let oldHostId = data.id;
         let game = games.getGame(oldHostId);//Gets game with old host id
-        if(game) {
+        if (game) {
             game.hostId = socket.id;//Changes the game host id to new host id
             socket.join(game.pin);
             let playerData = players.getPlayers(oldHostId);//Gets player in game
             for (let i = 0; i < Object.keys(players.players).length; i++){
-                if(players.players[i].hostId == oldHostId){
+                if (players.players[i].hostId == oldHostId) {
                     players.players[i].hostId = socket.id;
                 }
             }
@@ -122,16 +128,16 @@ io.on('connection', (socket) => {
                 if (err) throw err;
     
                 let dbo = db.db('murderDB');
-                // let query = { id:  parseInt(gameid)};
                 dbo.collection("interrogation").find().toArray(function(err, res) {
                     if (err) throw err;
-                    interrogationData = res;
-                    let question = interrogationData[0].question;
-                    let answer1 = interrogationData[0].answers[0];
-                    let answer2 = interrogationData[0].answers[1];
-                    let answer3 = interrogationData[0].answers[2];
-                    let answer4 = interrogationData[0].answers[3];
-                    let correctAnswer = interrogationData[0].correctAnswer;
+                    questionData = res;
+                    questionData.sort(() => Math.random() - 0.5);
+                    let question = questionData[0].question;
+                    let answer1 = questionData[0].answers[0];
+                    let answer2 = questionData[0].answers[1];
+                    let answer3 = questionData[0].answers[2];
+                    let answer4 = questionData[0].answers[3];
+                    let correctAnswer = questionData[0].correctAnswer;
                     
                     socket.emit('gameQuestions', {
                         q1: question,
@@ -181,7 +187,7 @@ io.on('connection', (socket) => {
         }
         
         //If the game has not been found
-        if(gameFound == false){
+        if (gameFound == false) {
             socket.emit('noGameFound'); //Player is sent back to 'join' page because game was not found with pin
         }
         
@@ -207,9 +213,9 @@ io.on('connection', (socket) => {
 
         let game = games.getGame(socket.id); //Finding game with socket.id
         //If a game hosted by that id is found, the socket disconnected is a host
-        if(game){
+        if (game) {
             //Checking to see if host was disconnected or was sent to game view
-            if(game.gameLive == false){
+            if (game.gameLive == false) {
                 isHostExist = false;
                 games.removeGame(socket.id);//Remove the game from games class
                 console.log('Game ended with pin:', game.pin);
@@ -217,23 +223,23 @@ io.on('connection', (socket) => {
                 let playersToRemove = players.getPlayers(game.hostId); //Getting all players in the game
 
                 //For each player in the game
-                for(let i = 0; i < playersToRemove.length; i++){
+                for (let i = 0; i < playersToRemove.length; i++) {
                     players.removePlayer(playersToRemove[i].playerId); //Removing each player from player class
                 }
 
                 io.to(game.pin).emit('hostDisconnect'); //Send player back to 'join' screen
                 socket.leave(game.pin); //Socket is leaving room
             }
-        }else{
+        } else {
             //No game has been found, so it is a player socket that has disconnected
             let player = players.getPlayer(socket.id); //Getting player with socket.id
             //If a player has been found with that id
-            if(player){
+            if (player) {
                 let hostId = player.hostId;//Gets id of host of the game
                 let game = games.getGame(hostId);//Gets game data with hostId
                 let pin = game.pin;//Gets the pin of the game
                 
-                if(game.gameLive == false){
+                if (game.gameLive == false) {
                     players.removePlayer(socket.id);//Removes player from players class
                     let playersInGame = players.getPlayers(hostId);//Gets remaining players in game
 
@@ -259,7 +265,7 @@ io.on('connection', (socket) => {
             game.gameData.playersAnswered += 1;
             
             let gameQuestion = game.gameData.question;
-            let correctAnswer = interrogationData[gameQuestion - 1].correctAnswer;
+            let correctAnswer = questionData[gameQuestion - 1].correctAnswer;
             //Checks player answer with correct answer
             socket.emit('answerResult', num == correctAnswer);
             if (num == correctAnswer) {
@@ -270,9 +276,9 @@ io.on('connection', (socket) => {
             }
 
             //Checks if all players answered
-            if (game.gameData.playersAnswered == playerNum.length){
+            if (game.gameData.playersAnswered == playerNum.length) {
                 game.gameData.questionLive = false; //Question has been ended bc players all answered under time
-                io.to(game.pin).emit('questionOverPlayer');//Tell everyone that question is over
+                io.to(game.pin).emit('questionOverPlayer'); //Tell everyone that question is over
                 io.to(game.hostId).emit("questionOverHost", correctAnswer, incorrectPlayer == 0);
             } else {
                 //update host screen of num players answered
@@ -301,7 +307,7 @@ io.on('connection', (socket) => {
                 killingFloorPlayers.push(player.name);
             }
         }
-        let correctAnswer = interrogationData[gameQuestion - 1].correctAnswer;
+        let correctAnswer = questionData[gameQuestion - 1].correctAnswer;
         io.to(game.pin).emit("questionOverPlayer");
         io.to(game.hostId).emit('questionOverHost', correctAnswer, incorrectPlayer == 0);
     });
@@ -322,8 +328,8 @@ io.on('connection', (socket) => {
         allPlayersAnswered = [];
         let playerData = players.getPlayers(socket.id);
         //Reset players current answer to 0
-        for(let i = 0; i < Object.keys(players.players).length; i++){
-            if(players.players[i].hostId == socket.id){
+        for (let i = 0; i < Object.keys(players.players).length; i++) {
+            if (players.players[i].hostId == socket.id) {
                 players.players[i].gameData.answer = 0;
             }
         }
@@ -332,15 +338,17 @@ io.on('connection', (socket) => {
         game.gameData.playersAnswered = 0;
         game.gameData.questionLive = true;
         game.gameData.question += 1;
-        
-        if (interrogationData.length >= game.gameData.question){
+        console.log(
+            deadPlayers
+        );
+        if (questionData.length >= game.gameData.question && deadPlayers.length + 1 < uniqueNames.size) {
             let questionNum = game.gameData.question;
             questionNum = questionNum - 1;
-            let question = interrogationData[questionNum].question;
-            let answer1 = interrogationData[questionNum].answers[0];
-            let answer2 = interrogationData[questionNum].answers[1];
-            let answer3 = interrogationData[questionNum].answers[2];
-            let answer4 = interrogationData[questionNum].answers[3];
+            let question = questionData[questionNum].question;
+            let answer1 = questionData[questionNum].answers[0];
+            let answer2 = questionData[questionNum].answers[1];
+            let answer3 = questionData[questionNum].answers[2];
+            let answer4 = questionData[questionNum].answers[3];
 
             socket.emit('gameQuestions', {
                 q1: question,
@@ -350,11 +358,96 @@ io.on('connection', (socket) => {
                 a4: answer4,
                 playersInGame: playerData.length
             });
+
+            io.to(game.pin).emit('nextQuestionPlayer');
+        } else {
+            breakoutQuesNum = 0;
+            questionData = null;
+            breakoutPlayers = players.getPlayers(socket.id).map(player => {
+                return {
+                    name: player.name,
+                    score: player.gameData.score,
+                    isAlive: deadPlayers.includes(player.name) != true,
+                    playerId: player.id
+                };
+            });
+            breakoutPlayers.sort((a, b) => (a.score < b.score || b.isAlive) ? 1 : -1);
+            breakoutPlayers[0].isAlive = true;
+            socket.emit("breakoutFloorHost", breakoutPlayers);
+            io.to(game.pin).emit("breakoutFloorPlayer");
         }
-        
-        io.to(game.pin).emit('nextQuestionPlayer');
     });
     
+    socket.on("swapLife", function(newIsAlive, oldIsAlive) {
+        io.to(newIsAlive).emit("swapLifePlayer");
+        io.to(oldIsAlive).emit("swapLifePlayer");
+    });
+
+    socket.on("breakoutTimeup", function() {
+        let game = games.getGame(socket.id);
+        io.to(game.pin).emit("breakoutTimeupPlayer")
+    });
+
+    socket.on('nextBreakoutQuestion', () => {
+        let game = games.getGame(socket.id);
+        breakoutAllPlayersAnswers = {};
+        console.log(questionData);
+        if (questionData == null) {
+            MongoClient.connect(url, function(err, db) {
+                if (err) throw err;
+                let dbo = db.db('murderDB');
+                dbo.collection("breakout").find().toArray(function(err, res) {
+                    if (err) throw err;
+                    questionData = res;
+                    questionData.sort(() => Math.random() - 0.5);
+                    let question = questionData[breakoutQuesNum].question;
+                    let answers = questionData[breakoutQuesNum].answers;
+                    let corrects = questionData[breakoutQuesNum].corrects;
+
+                    socket.emit('breakoutQuestionData', {
+                        question,
+                        answers,
+                        corrects
+                    });
+
+                    io.to(game.pin).emit("nextBreakoutQuestionPlayer", answers);
+                    db.close();
+                });
+            });
+        } else {
+            let question = questionData[breakoutQuesNum].question;
+            let answers = questionData[breakoutQuesNum].answers;
+            let corrects = questionData[breakoutQuesNum].corrects;
+
+            socket.emit('breakoutQuestionData', {
+                question,
+                answers,
+                corrects
+            });
+
+            io.to(game.pin).emit("nextBreakoutQuestionPlayer", answers);
+        }
+    });
+
+    socket.on("breakoutPlayerAnswer", function(playerAnswers) {
+        let player = players.getPlayer(socket.id);
+        let game = games.getGame(player.hostId);
+        let playerCorrects = [];
+
+        for (let i = 1; i <= 3; i++) {
+            playerCorrects.push(questionData[breakoutQuesNum].corrects.includes(i) ^ (!playerAnswers.includes(i)));
+        }
+
+        breakoutAllPlayersAnswers[player.name] = playerCorrects;
+
+        if (Object.keys(breakoutAllPlayersAnswers).length == uniqueNames.size) {
+            console.log("All players answer");
+            io.to(player.hostId).emit("breakoutMoveHost", breakoutAllPlayersAnswers, breakoutQuesNum);
+            io.to(game.pin).emit("breakoutMovePlayer");
+            breakoutQuesNum++;
+        }
+    });
+
     socket.on('killingFloor', function() {
         let game = games.getGame(socket.id);
         let aliveNonKillingFloor = 0;
@@ -365,29 +458,42 @@ io.on('connection', (socket) => {
                 aliveNonKillingFloor++;
             }
         }
+
         MongoClient.connect(url, function(err, db){
             if (err) throw err;
             let query = {
-                id: 4
-                // minKillingFloor: { $lte: incorrectPlayer },
-                // maxKillingFloor: { $gte: incorrectPlayer },
+                minKillingFloor: { $lte: incorrectPlayer },
+                maxKillingFloor: { $gte: incorrectPlayer },
                 // minAliveNonKillingFloor: { $lte: aliveNonKillingFloor },
-                // minNonKillingFloor: { $lte: uniqueNames.size - incorrectPlayer },
+                minNonKillingFloor: { $lte: uniqueNames.size - incorrectPlayer },
+                maxNonKillingFloor: { $gte: uniqueNames.size - incorrectPlayer }
             };
             let dbo = db.db('murderDB');
             dbo.collection("killing").find(query).toArray(function(err, res) {
                 if (err) throw err;
-                for (let i = 0; i < res.length; i++) {
-                    if (!set.has(res[i].id)) {
-                        ret = res[i];
-                        set.add(ret.id);
-                        challengeId = ret.id;
-                        io.to(game.pin).emit("nextKillingFloorPlayer", {...ret, killingFloorPlayers});
-                        break;
+                if (res.length > 0) {
+                    res.sort(() => Math.random() - 0.5);
+                    for (let i = 0; i < res.length; i++) {
+                        if (!set.has(res[i].id)) {
+                            ret = res[i];
+                            set.add(ret.id);
+                            challengeId = ret.id;
+                            io.to(game.pin).emit("nextKillingFloorPlayer", {...ret, killingFloorPlayers});
+                            break;
+                        }
                     }
+                    
+                    socket.emit("nextKillingFloor", ret, killingFloorPlayers);
+                } else {
+                    console.log({
+                        minKillingFloor: { $lte: incorrectPlayer },
+                        maxKillingFloor: { $gte: incorrectPlayer },
+                        minAliveNonKillingFloor: { $lte: aliveNonKillingFloor },
+                        minNonKillingFloor: { $lte: uniqueNames.size - incorrectPlayer },
+                        maxNonKillingFloor: { $gte: uniqueNames.size - incorrectPlayer }
+                    });
                 }
                 
-                socket.emit("nextKillingFloor", ret, killingFloorPlayers);
                 db.close();
             });
         });
@@ -411,6 +517,8 @@ io.on('connection', (socket) => {
             }
         } else if (challengeId == 4) {
             io.to(player.hostId).emit("challengeFourHint", challengeFourPassword, challengeFourHint);
+        } else if (challengeId == 11) {
+            challengeElevenGuessCounter = uniqueNames.size - killingFloorPlayers.length;
         }
     });
 
@@ -425,7 +533,7 @@ io.on('connection', (socket) => {
         challengeOne = {};
         challengeOneMin = 1000;
         challengeOneMax = 0;
-        challengeTwoMin = 20;
+        challengeTwoMin = {};
         challengeTwoDeadPlayers = [];
         challengeThreePoisons = [false, false, false, false, false, false, false, false];
         challengeThreeUpdateData = [];
@@ -449,24 +557,9 @@ io.on('connection', (socket) => {
         challengeEightHole = [];
         challengeEightDone = false;
         challengeNineOptions = {};
+        challengeElevenImpress = [];
         deadPlayers = [];
         allPlayersAnswered = [];
-    });
-    
-    //Give user game names data
-    socket.on('requestDbNames', function(){
-        
-        MongoClient.connect(url, function(err, db){
-            if (err) throw err;
-    
-            let dbo = db.db('murderDB');
-            dbo.collection("interrogation").find().toArray(function(err, res) {
-                if (err) throw err;
-                
-                socket.emit('gameNamesData', res);
-                db.close();
-            });
-        });       
     });
 
     socket.on("challenge1Submit", function(num) {
@@ -499,7 +592,10 @@ io.on('connection', (socket) => {
             }
 
             io.to(game.hostId).emit("updateChallengeValues", updateData);
-            
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
     });
 
@@ -512,13 +608,35 @@ io.on('connection', (socket) => {
         player = players.getPlayer(socket.id);
         game = games.getGame(player.hostId);
         if (num == -1000) {
+            if (!(socket.id in challengeTwoMin)) {
+                challengeTwoMin[socket.id] = 0;
+            }
             incorrectPlayer--;
             if (incorrectPlayer == 0) {
+                let minVal = 1000;
+                for (let playerId in challengeTwoMin) {
+                    if (challengeTwoMin[playerId] < minVal) {
+                        minVal = challengeTwoMin[playerId];
+                        challengeTwoDeadPlayers = [playerId];
+                    } else if (challengeTwoMin[playerId] == minVal) {
+                        challengeTwoDeadPlayers.push(playerId);
+                    }
+                }
+                console.log("challengeTwoDeadPlayersNames: " + challengeTwoDeadPlayers.map(playerId => players.getPlayer(playerId).name));
                 io.to(player.hostId).emit("challengeOverHost", challengeTwoDeadPlayers.map(playerId => players.getPlayer(playerId).name));
-                io.to(player.hostId).emit("updateChallengeValues");
-                io.in(game.pin).emit("playerDisplayLifeStatus", challengeTwoDeadPlayers.map(playerId => players.getPlayer(playerId).name));
+                io.to(player.hostId).emit("updateChallengeValues", challengeTwoDeadPlayers.map(playerId => {
+                    return {
+                        name: players.getPlayer(playerId).name,
+                        value: "Ghost"
+                    }
+                }));
+                io.in(game.pin).emit("playerDisplayLifeStatus", challengeTwoDeadPlayers);
                 deadPlayers.push(...(challengeTwoDeadPlayers.map(playerId => players.getPlayer(playerId).name)));
                 challengeTwoDeadPlayers = [];
+                if (deadPlayers.length + 1 == uniqueNames.size) {
+                    io.to(game.hostId).emit("breakoutReached");
+                }
+                io.to(game.pin).emit("challengeOverPlayer", challengeId);
             }
         } else if (num == -1) {
             deadPlayers.push(player.name);
@@ -526,11 +644,14 @@ io.on('connection', (socket) => {
             io.to(player.hostId).emit("updateChallengeValues", [{ name: player.name, value: "WRONG"}]);
             io.to(game.pin).emit("challengeOverPlayer", 2, -1000);
             io.in(game.pin).emit("playerDisplayLifeStatus", [socket.id]);
-        } else if (num < challengeTwoMin) {
-            challengeTwoMin = num;
-            challengeTwoDeadPlayers = [socket.id];
-        } else if (num == challengeTwoMin) {
-            challengeTwoDeadPlayers.push(socket.id);
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+        } else {
+            if (socket.id in challengeTwoMin)
+                challengeTwoMin[socket.id]++;
+            else
+                challengeTwoMin[socket.id] = 1;
         }
     });
 
@@ -570,6 +691,10 @@ io.on('connection', (socket) => {
             io.to(game.pin).emit("playerDisplayLifeStatus", challengeThreeDeadPlayers);
             deadPlayers.push(...(challengeThreeDeadPlayers.map(playerId => players.getPlayer(playerId).name)));
             challengeThreeDeadPlayers = [];
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
     });
 
@@ -606,6 +731,13 @@ io.on('connection', (socket) => {
             }
             io.to(game.pin).emit("challengeOverPlayer", challengeId);
             io.to(game.pin).emit("playerDisplayLifeStatus", playerIds);
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+        }
+
+        if (guess != "") {
+            io.to(player.hostId).emit("updateGuess", guess, player.name, guess == challengeFourPassword);
         }
 
         if (challengeFourGuessCounter == 0 && challengeFourFlag == false) {
@@ -631,6 +763,7 @@ io.on('connection', (socket) => {
             challengeFiveTakeMoney[isTakeMoney] = [socket.id];
         }
         if (incorrectPlayer == 0) {
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
             if (!(false in challengeFiveTakeMoney)) {
                 deadPlayers.push(...(challengeFiveTakeMoney[true].map(playerId => players.getPlayer(playerId).name)));
                 io.to(player.hostId).emit("challengeOverHost", challengeFiveTakeMoney[true].map(playerId => players.getPlayer(playerId).name));
@@ -641,6 +774,9 @@ io.on('connection', (socket) => {
                     }
                 }));
                 io.to(game.pin).emit("playerDisplayLifeStatus", challengeFiveTakeMoney[true]);
+                if (deadPlayers.length + 1 == uniqueNames.size) {
+                    io.to(game.hostId).emit("breakoutReached");
+                }
             } else if (!(true in challengeFiveTakeMoney)) {
                 io.to(player.hostId).emit("challengeOverHost", []);
                 io.to(player.hostId).emit("updateChallengeValues", challengeFiveTakeMoney[false].map(playerId => {
@@ -667,6 +803,9 @@ io.on('connection', (socket) => {
                 io.to(player.hostId).emit("updateChallengeValues", updateData);
                 io.to(game.pin).emit("playerDisplayLifeStatus", challengeFiveTakeMoney[false]);
                 deadPlayers.push(...(challengeFiveTakeMoney[false].map(playerId => players.getPlayer(playerId).name)));
+                if (deadPlayers.length + 1 == uniqueNames.size) {
+                    io.to(game.hostId).emit("breakoutReached");
+                }
             }
         }
     });
@@ -700,7 +839,11 @@ io.on('connection', (socket) => {
             io.to(player.hostId).emit("challengeOverHost", minSpells.map(playerId => players.getPlayer(playerId).name));
             io.to(player.hostId).emit("updateChallengeValues", updateData);
             io.to(game.pin).emit("playerDisplayLifeStatus", minSpells);
-            deadPlayers.push(minSpells.map(playerId => players.getPlayer(playerId).name));
+            deadPlayers.push(...(minSpells.map(playerId => players.getPlayer(playerId).name)));
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
     });
 
@@ -738,11 +881,15 @@ io.on('connection', (socket) => {
             }
             io.to(game.pin).emit("challengeOverPlayer", challengeId);
             io.to(game.pin).emit("playerDisplayLifeStatus", playerIds);
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
         }
         if (challengeSevenGuessCounter == 0 && challengeSevenFlag == false) {
             io.to(player.hostId).emit("challengeSevenShowAvenger", challengeSevenAvenger, Array.from(challengeSevenGuess));
             io.to(player.hostId).emit("challengeOverHost", []);
             io.to(game.pin).emit("playerDisplayLifeStatus", []);
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
     });
 
@@ -750,6 +897,7 @@ io.on('connection', (socket) => {
         player = players.getPlayer(socket.id);
         game = games.getGame(player.hostId);
         challengeEightHide[socket.id] = { row, col };
+        io.to(game.pin).emit("addUniquePos", (row - 1) * 5 + col);
         io.to(player.hostId).emit("beforeStartKillingSubmit", player.name);
     });
 
@@ -757,6 +905,10 @@ io.on('connection', (socket) => {
         player = players.getPlayer(socket.id);
         game = games.getGame(player.hostId);
 
+        console.log({
+            challengeEightSkew,
+            hole
+        });
         if (hole != 1000) {
             challengeEightHole.push(hole);
         } 
@@ -792,7 +944,7 @@ io.on('connection', (socket) => {
                 });
                 if (challengeEightSkew[row - 1][col - 1]) {
                     challengeEightDeadPlayers.push(playerId);
-                    deadPlayers.push(playerId);
+                    deadPlayers.push(players.getPlayer(playerId).name);
                 }
             }
             io.to(player.hostId).emit("challengeOverHost", challengeEightDeadPlayers.map(playerId => players.getPlayer(playerId).name));
@@ -802,6 +954,10 @@ io.on('connection', (socket) => {
                 io.to(player.hostId).emit("updateChallengeValues", updateData);
                 io.to(game.pin).emit("playerDisplayLifeStatus", challengeEightDeadPlayers);
             }, 2000);
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
     });
 
@@ -853,6 +1009,98 @@ io.on('connection', (socket) => {
             io.to(player.hostId).emit("challengeOverHost", challengeNineDeadPlayers.map(playerId => players.getPlayer(playerId).name));
             io.to(player.hostId).emit("challengeNineShowResults", displayData, updateData);
             io.to(game.pin).emit("playerDisplayLifeStatus", challengeNineDeadPlayers);
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
         }
+    });
+
+    socket.on("challenge11Impress", function(whiteCard){
+        player = players.getPlayer(socket.id);
+        challengeElevenImpress.push({
+            name: player.name,
+            impress: whiteCard,
+            votes: 0,
+            playerId: socket.id
+        })
+        io.to(player.hostId).emit("beforeStartKillingSubmit", player.name);
+    });
+
+    socket.on("challenge11DisplayImpress", function() {
+        game = games.getGame(socket.id);
+        challengeElevenImpress.sort(() => Math.random() - 0.5);
+        io.to(game.pin).emit("challengeElevenCreateVotes", challengeElevenImpress.length);
+        socket.emit("challengeElevenDisplayImpress", challengeElevenImpress.map(({impress}) => impress));
+    });
+
+    socket.on("challenge11Submit", function(vote) {
+        player = players.getPlayer(socket.id);
+        game = games.getGame(player.hostId);
+        if (vote != -1000) {
+            challengeElevenImpress[vote - 1].votes++;
+        }
+        
+        challengeElevenGuessCounter--;
+        if (challengeElevenGuessCounter == 0) {
+            let minVotes = 1000;
+            let challengeElevenDeadPlayers = [];
+            for (let player of challengeElevenImpress) {
+                if (player.votes < minVotes) {
+                    minVotes = player.votes;
+                    challengeElevenDeadPlayers = [player.playerId];
+                } else if (player.votes == minVotes) {
+                    challengeElevenDeadPlayers.push(player.playerId);
+                }
+            }
+            
+            io.to(player.hostId).emit("challengeOverHost", challengeElevenDeadPlayers.map(playerId => players.getPlayer(playerId).name));
+            io.to(player.hostId).emit("challengeElevenShowResults", challengeElevenImpress);
+            io.to(player.hostId).emit("updateChallengeValues", challengeElevenDeadPlayers.map(playerId => {
+                return {
+                    name: players.getPlayer(playerId).name,
+                    value: "Ghost"
+                }
+            }));
+            io.to(game.pin).emit("playerDisplayLifeStatus", challengeElevenDeadPlayers);
+            deadPlayers.push(...(challengeElevenDeadPlayers.map(playerId => players.getPlayer(playerId).name)));
+            if (deadPlayers.length + 1 == uniqueNames.size) {
+                io.to(game.hostId).emit("breakoutReached");
+            }
+            io.to(game.pin).emit("challengeOverPlayer", challengeId);
+            
+        }
+    });
+
+    socket.on("challenge12Start", function(link) {
+        game = games.getGame(socket.id);
+        io.to(game.pin).emit("challengeTwelveStart", link);
+    });
+
+    socket.on("challenge12Stop", function(isKill) {
+        game = games.getGame(socket.id);
+        io.to(game.pin).emit("challengeTwelveStop", isKill);
+    });
+
+    socket.on("gameOver", function(playerId) {
+        game = games.getGame(socket.id);
+        io.to(game.pin).emit("gameOverPlayer");
+        io.to(playerId).emit("youWinPlayer");
+    })
+
+    socket.on("breakoutKillPlayer", function(name, score) {
+        for (let i = 0; i < breakoutPlayers.length; i++) {
+            if (breakoutPlayers[i].name == name) {
+                breakoutPlayers[i].score = score;
+                breakoutPlayers[i].isAlive = false;
+                break;
+            }
+        }
+        player = players.getPlayers(socket.id).filter(p => p.name == name)[0]
+        console.log({
+            breakoutPlayers,
+            player
+        })
+        io.to(player.id).emit("breakoutKillPlayer");
     });
 });

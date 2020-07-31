@@ -4,9 +4,10 @@ let correct = false;
 let name;
 let score = 0;
 let challengeDone = false;
+let myWindow;
 var isAlive = true;
 var challengeData = {id: 0};
-
+let uniquePos = new Set();
 let dictionary;
 
 axios.get("../../files/en_US.aff")
@@ -80,11 +81,60 @@ socket.on('nextQuestionPlayer', function(){
     correct = false;
     playerAnswered = false;
     document.getElementById('stats').style.display = "none";
+    document.getElementById("lifeStatus").innerText = "";
     document.getElementById("killingFloor").style.display = "none";
     document.getElementById("message").style.display = "none";
     document.getElementById("answerButtons").style.display = "block";
+    document.getElementById("interrogationFloor").style.display = "block";
     document.body.style.backgroundColor = "white";
     
+});
+
+socket.on("breakoutFloorPlayer", function() {
+    document.getElementById("interrogationFloor").style.display = "none";
+    document.getElementById("killingFloor").style.display = "none";
+    document.body.style.backgroundColor = "white";
+});
+
+socket.on("nextBreakoutQuestionPlayer", function(answers) {
+    for (let i = 0; i < 3; i++) {
+        document.getElementById(`label_${i + 1}`).lastChild.nodeValue = answers[i];
+        document.getElementById(`label_${i + 1}`).classList.remove("isSelected");
+        document.getElementById(`label_${i + 1}`).firstElementChild.checked = false;
+    }
+    document.getElementById("label_3").style.display = isAlive ? "none" : "block";
+    document.getElementById("breakoutFloor").style.display = "block";
+});
+
+socket.on("gameOverPlayer", function() {
+    document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("gameOver").innerText = "You Lost!!!";
+    document.getElementById("gameOver").style.display = "block";
+});
+
+socket.on("youWinPlayer", function() {
+    document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("gameOver").innerText = "You Win!!!";
+    document.getElementById("gameOver").style.display = "block";
+});
+
+socket.on("swapLifePlayer", function() {
+    isAlive = !isAlive;
+});
+
+socket.on("breakoutTimeupPlayer", function() {
+    document.getElementById("breakoutFloor").style.display = "none";
+    let playerAnswers = [];
+    for (let i = 1; i <= 3; i++) {
+        if (document.getElementById(`label_${i}`).firstElementChild.checked) {
+            playerAnswers.push(i);
+        }
+    }
+    socket.emit("breakoutPlayerAnswer", playerAnswers);
+});
+
+socket.on("breakoutMovePlayer", function() {
+    document.getElementById("breakoutFloor").style.display = "none";
 });
 
 socket.on("clearInterrogation", function() {
@@ -93,6 +143,7 @@ socket.on("clearInterrogation", function() {
     document.getElementById('message').style.display = "none";
     document.getElementById("killingFloor").style.display = "block";
     document.getElementById("lifeStatus").innerText = "";
+    document.getElementById("interrogationFloor").style.display = "none";
 });
 
 socket.on('nextKillingFloorPlayer', function(data){
@@ -106,7 +157,7 @@ socket.on('nextKillingFloorPlayer', function(data){
             displayPlayer(false, "block");
             displayPlayer(true, "none");
         }
-    } else if (challengeData.id == 4 || challengeData.id == 7 || challengeData.id == 8) {
+    } else if ([4, 7, 8, 11].includes(challengeData.id)) {
         document.getElementById(`challenge${challengeData.id}`).style.display = "block";
         if (isAlive && !correct) {
             displayPlayer(true, "block");
@@ -116,6 +167,16 @@ socket.on('nextKillingFloorPlayer', function(data){
         document.getElementById("whoToKill").innerHTML = challengeData.killingFloorPlayers.map(player => {
             return name == player ? "" : `<option value="${player}">${player}</option>`;
         }).join("");
+    } else if (challengeData.id == 10) {
+        if (isAlive && !correct) {
+            let a = Math.floor((Math.random() * 4) + 1);
+            let b = Math.floor((Math.random() * 4) + 1);
+            while (b == a) {
+                b = Math.floor((Math.random() * 4) + 1);
+            }
+            document.getElementById(`answer${a}`).onclick = () => answerSubmitted(b);
+            document.getElementById(`answer${b}`).onclick = () => answerSubmitted(a);
+        }
     }
 });
 
@@ -131,7 +192,7 @@ socket.on("startKillingPlayer", function() {
             document.getElementById("takeMoney").style.display = "inline-block";
             document.getElementById("takeNothing").style.display = "inline-block";
         }
-    } else if (challengeData.id == 4  || challengeData.id == 7) {
+    } else if ([4, 7, 11].includes(challengeData.id)) {
         displayPlayer(false, "block");
         displayPlayer(true, "none");
     } else if (challengeData.id == 8) {
@@ -141,6 +202,12 @@ socket.on("startKillingPlayer", function() {
 
 socket.on("challengeEightSkew", function() {
     displayPlayer(false, "block");
+});
+
+socket.on("challengeElevenCreateVotes", function(votes) {
+    for (let i = 1; i <= votes; i++) {
+        document.getElementById("vote").innerHTML += `<option value="${i}">${i}</option>`;
+    }
 });
 
 socket.on('hostDisconnect', function(){
@@ -281,9 +348,17 @@ function challengeSevenGuess() {
 }
 
 function challengeEightHide() {
-    socket.emit("challenge8Hide", document.getElementById("row").value, document.getElementById("col").value);
-    document.getElementById("hide").style.display = "none";
+    if (!uniquePos.has((document.getElementById("row").value - 1) * 5 + document.getElementById("col").value)) {
+        socket.emit("challenge8Hide", document.getElementById("row").value, document.getElementById("col").value);
+        document.getElementById("hide").style.display = "none";
+    } else {
+        alert("Someone already hid here!!!");
+    }
 }
+
+socket.on("addUniquePos", function(pos) {
+    uniquePos.add(pos);
+});
 
 function challengeEightSkew() {
     socket.emit("challenge8Submit", document.getElementById("hole").value);
@@ -296,17 +371,32 @@ function checkIfKill() {
 }
 
 function challengeNineSubmit() {
-    if (challengeDone == false) {
-        let option = document.getElementById("challenge9Option").value;
-        if (option == "corona") {
-            socket.emit("challenge9Submit", option, document.getElementById("whoToKill").value);
-        } else {
-            socket.emit("challenge9Submit", option);
-        }
+    let option = document.getElementById("challenge9Option").value;
+    if (option == "corona") {
+        socket.emit("challenge9Submit", option, document.getElementById("whoToKill").value);
+    } else {
+        socket.emit("challenge9Submit", option);
     }
     
     document.getElementById("challenge9").style.display = "none";
     challengeDone = true;
+}
+
+function challengeElevenSubmit() {
+    let whiteCard = document.getElementById("whiteCard");
+    if (whiteCard.checkValidity()) {
+        socket.emit("challenge11Impress", whiteCard.value);
+        displayPlayer(true, "none");
+    } else {
+        alert("Please type something ^^");
+    }
+}
+
+function challengeElevenVote() {
+    let vote = document.getElementById("vote");
+    socket.emit("challenge11Submit", vote.value);
+    challengeDone = true;
+    displayPlayer(false, "none");
 }
 
 function displayPlayer(isKillingFloor, disp) {
@@ -317,7 +407,7 @@ function displayPlayer(isKillingFloor, disp) {
 socket.on("challengeOverPlayer", function(challengeId, value) {
     document.getElementById(`challenge${challengeId}`).style.display = "none";
     if ((isAlive && !correct) ^ (challengeId == 4 || challengeId == 7)) {
-        if (!challengeDone && isAlive) {
+        if (!challengeDone && isAlive && value != null) {
             socket.emit(`challenge${challengeId}Submit`, value);
         }
     }
@@ -325,7 +415,7 @@ socket.on("challengeOverPlayer", function(challengeId, value) {
 });
 
 socket.on("playerDisplayLifeStatus", function(deadPlayers) {
-    if (isAlive && !correct){
+    if (isAlive && !correct) {
         if (deadPlayers.includes(socket.id)) {
             isAlive = false;
             document.getElementById("lifeStatus").innerText = "You are now a Ghost 💀";
@@ -337,3 +427,30 @@ socket.on("playerDisplayLifeStatus", function(deadPlayers) {
     }
 });
 
+socket.on("challengeTwelveStart", function(link) {
+    myWindow = window.open(link);
+});
+
+socket.on("challengeTwelveStop", function(isKill) {
+    myWindow.close();
+    if (isAlive && !correct) {
+        if (isKill) {
+            isAlive = false;
+            document.getElementById("lifeStatus").innerText = "You are now a Ghost 💀";
+            document.getElementById("liveness").innerText = "Life Status: You are a Ghost 💀";
+        } else {
+            document.getElementById("lifeStatus").innerText = "You are lucky this time 😠";
+            document.getElementById("liveness").innerText = "Life Status: You are alive 👌";
+        }
+    }
+});
+
+function handleChecked(elem) {
+    elem.parentElement.classList.toggle("isSelected");
+}
+
+socket.on("breakoutKillPlayer", function() {
+    document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("gameOver").innerText = "You Lost!!!";
+    document.getElementById("gameOver").style.display = "block";
+});

@@ -1,0 +1,116 @@
+[{
+  "_id": {
+    "$oid": "5f0c15e4f6420aa86ae609fa"
+  },
+  "id": 1,
+  "minAliveNonKillingFloor": 1,
+  "minKillingFloor": 3,
+  "maxKillingFloor": 12,
+  "name": "Pick a Number, any Number",
+  "description": "Chọn 1 số từ 0-1000, ai chọn số cao nhất hoặc thấp nhất sẽ chết"
+},{
+  "_id": {
+    "$oid": "5f0c20ce9159557818c8e9e1"
+  },
+  "id": 2,
+  "minAliveNonKillingFloor": 1,
+  "minKillingFloor": 2,
+  "maxKillingFloor": 10,
+  "name": "Math is Life",
+  "description": "Ai làm được ít câu Toán nhất sau khi hết thời gian hoặc làm sai đầu tiên sẽ chết"
+},{
+  "_id": {
+    "$oid": "5f0c22539159557818c8e9e2"
+  },
+  "id": 3,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 8,
+  "minAliveNonKillingFloor": 1,
+  "name": "Would you like some poison?",
+  "description": "Có 8 chiếc cốc, những người trả lời đúng câu hỏi trước chọn 1 cốc để bỏ độc vào. Sau đó, những người tham gia Killing Floor này sẽ chọn tiếp 1 cốc để uống, nếu cốc đó có độc thì chết."
+},{
+  "_id": {
+    "$oid": "5f0c6ee5251e0b21046c2d1e"
+  },
+  "id": 4,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 1,
+  "name": "Passwordize Your Life",
+  "description": "Tạo 1 password là 1 từ tiếng anh có 4 chữ cái và chọn 1 chữ cái để làm hint cho những người khác. Những người khác sẽ lần lượt đoán từ này. Nếu đoán trúng thì bạn chết."
+},{
+  "_id": {
+    "$oid": "5f1175fbb5f875b88848e60d"
+  },
+  "id": 5,
+  "minKillingFloor": 2,
+  "maxKillingFloor": 11,
+  "minAliveNonKillingFloor": 1,
+  "name": "The Greedy Game",
+  "description": "Có rất nhiều tiền trước mặt mọi người, mỗi người chọn lấy $100 (tương ứng vs 100 điểm) hoặc không lấy. Nếu tất cả đều chọn không lấy tiền, ko ai chết. Nếu tất cả chọn lấy tiền, tất cả đều chết. Nếu có người lấy tiền và có người không, những người không lấy tiền sẽ chết."
+},{
+  "_id": {
+    "$oid": "5f1177acb5f875b88848e60e"
+  },
+  "id": 6,
+  "minKillingFloor": 2,
+  "maxKillingFloor": 11,
+  "minAliveNonKillingFloor": 1,
+  "name": "Deadly Spelling Bee",
+  "description": "Nhìn vào hình sau đây, tìm 1 từ tiếng anh bất kỳ (mỗi chữ cái trong hình đc sử dụng 1 lần). Người chơi nào tìm được từ ngắn nhất sẽ chết"
+},{
+  "_id": {
+    "$oid": "5f1177fbb5f875b88848e60f"
+  },
+  "id": 7,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 1,
+  "name": "Mentalism",
+  "description": "Chọn một siêu anh hùng trong Avengers (Someone that actually has superpower) và những người chơi khác cũng sẽ chọn tương tự, nếu có ai đó chọn giống bạn, bạn chết"
+},{
+  "_id": {
+    "$oid": "5f117865b5f875b88848e610"
+  },
+  "id": 8,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 9,
+  "minAliveNonKillingFloor": 1,
+  "name": "Hide and Skew",
+  "description": "Nhìn hình sau đây và chọn 1 ô màu trắng để 'trốn'. 4 người chơi còn lại sẽ skew 1 thanh kiếm vào những vị trí như hình thứ 2, mỗi thanh kiếm dài 3 ô. Người nào bị đâm trúng sẽ chết"
+},{
+  "_id": {
+    "$oid": "5f118eefb5f875b88848e611"
+  },
+  "id": 9,
+  "minKillingFloor": 2,
+  "maxKillingFloor": 11,
+  "minAliveNonKillingFloor": 1,
+  "name": "Welcome to COVID-19",
+  "description": "Each player chooses either Corona, Mask or Money and chooses another target player if your option is Corona. If you choose Mask, you will not be infected. If you choose Corona and aim at a player without a Mask, that player will be infected, even if someone with Corona targets you. If you chooses Money and no player with Corona targets you, you will get 100 points."
+},{
+  "_id": {
+    "$oid": "5f119076b5f875b88848e612"
+  },
+  "id": 10,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 12,
+  "name": "Mess Up Your Choices",
+  "description": "Your choices A,B,C,D order will now be mixed up randomly (i.e. D,C,A,B). This means if you think the correct answer is A, you must choose C"
+},{
+  "_id": {
+    "$oid": "5f1191e4b5f875b88848e613"
+  },
+  "id": 11,
+  "minKillingFloor": 2,
+  "maxKillingFloor": 5,
+  "name": "Impress Others or Die",
+  "description": "Each player fills in the blank of a given sentence. Others will vote for the best sentence. Who got the least votes die."
+},{
+  "_id": {
+    "$oid": "5f1196ccb5f875b88848e614"
+  },
+  "id": 12,
+  "minKillingFloor": 1,
+  "maxKillingFloor": 1,
+  "name": "Spot the Murder",
+  "description": "The player will find the murder (Game Master) from his 'hand-writting'. Game Master and other players will 'draw' a word on a white background. The player will select which word was written by the Game Master. If it is wrong, the player dies."
+}]

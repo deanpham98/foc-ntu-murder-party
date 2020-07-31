@@ -7,11 +7,22 @@
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     </head>
     <body style="font-family: 'Raleway', sans-serif;">
-        <div id = "stats">
-            <h4 id = "nameText">Name: </h4>
-            <h4 id = "scoreText">Score: </h4>
-            <h4 id = "liveness">Life Status: You are alive 👌</h4>
+        <script src = "./js/disableInspect.js"></script>
+        <div id="interrogationFloor">
+            <div id = "stats">
+                <h4 id = "nameText">Name: </h4>
+                <h4 id = "scoreText">Score: </h4>
+                <h4 id = "liveness">Life Status: You are alive 👌</h4>
+            </div>
+            <h2 id = "message"></h2>
+            <div id = "answerButtons" style="height: 100%">
+                <button onclick = "answerSubmitted(1)" id = "answer1">A</button>
+                <button onclick = "answerSubmitted(2)" id = "answer2">B</button>
+                <button onclick = "answerSubmitted(3)" id = "answer3">C</button>
+                <button onclick = "answerSubmitted(4)" id = "answer4">D</button>
+            </div>
         </div>
+        
         <div id = "killingFloor">
             <div id = "challenge1">
                 <form id = "pickNumber">
@@ -197,21 +208,42 @@
 
             </div>
             <div id="challenge11">
-
+                <form class="killing-floor">
+                    <label for="whiteCard">Fill in the blank</label>
+                    <input id="whiteCard" type="text" required autofocus>
+                    <br>
+                    <button onclick="challengeElevenSubmit(); return false;">Submit</button>
+                </form>
+                <form class="non-killing-floor">
+                    <label for="vote">Cast Your Vote</label>
+                    <select id="vote">
+                        
+                    </select>
+                    <br>
+                    <button onclick="challengeElevenVote(); return false;">Submit</button>
+                </form>
             </div>
             <div id="challenge12">
-                
+
             </div>
-            <div id = "lifeStatus" style="font-size:30px; color:white; text-align: center; margin: 30px; display: none;">
+            <div id = "lifeStatus" style="font-size:30px; color:white; text-align: center; padding: 30px;">
 
             </div>
         </div>
-        <h2 id = "message"></h2>
-        <div id = "answerButtons" style="height: 100%">
-            <button onclick = "answerSubmitted(1)" id = "answer1">A</button>
-            <button onclick = "answerSubmitted(2)" id = "answer2">B</button>
-            <button onclick = "answerSubmitted(3)" id = "answer3">C</button>
-            <button onclick = "answerSubmitted(4)" id = "answer4">D</button>
+
+        <div id="breakoutFloor">
+            <label id="label_1">
+                <input type="checkbox" onclick="handleChecked(this)"/>
+                A. Answer
+            </label>
+            <label id="label_2">
+                <input type="checkbox" onclick="handleChecked(this)"/>
+                B. Answer
+            </label>
+            <label id="label_3">
+                <input type="checkbox" onclick="handleChecked(this)"/>
+                C. Answer
+            </label>
         </div>
         <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>

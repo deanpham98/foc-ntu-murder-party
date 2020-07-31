@@ -1,0 +1,209 @@
+[{
+  "_id": {
+    "$oid": "5f0c0277f6420aa86ae609f8"
+  },
+  "id": "1",
+  "question": "\"Rời bỏ anh, xa anh, quay mặt lặng lẽ quên mau. \" là lời của tuyệt tác nào của Sơn Tùng MTP?",
+  "answers": [
+    "A. Chúng ta không thuộc về nhau",
+    "B. Nắng ấm xa dần",
+    "C. Cơn mưa ngang qua",
+    "D. Buông đôi tay nhau ra"
+  ],
+  "correctAnswer": 2
+},{
+  "_id": {
+    "$oid": "5f0c0ea0f6420aa86ae609f9"
+  },
+  "id": "2",
+  "question": "Định luật sau đây có tên là gì? Nếu một vật không chịu tác dụng của lực nào hoặc chịu tác dụng của các lực có hợp lực bằng không thì nó giữ nguyên trạng thái đứng yên hoặc chuyển động thẳng đều.",
+  "answers": [
+    "A. Định luật 3 Newton",
+    "B. Định luật Archimedes",
+    "C. Định luật 1 Newton",
+    "D. Định luật 2 Newton"
+  ],
+  "correctAnswer": 3
+},{
+  "_id": {
+    "$oid": "5f115fd4b5f875b88848e5ff"
+  },
+  "id": "3",
+  "question": "Quang Hải ghi bàn trong trận chung kết U23 AFC vào lưới Uzbekistan ở phút thứ mấy?",
+  "answers": [
+    "A. 70",
+    "B. 30",
+    "C. 40",
+    "D. 50"
+  ],
+  "correctAnswer": 3
+},{
+  "_id": {
+    "$oid": "5f116038b5f875b88848e600"
+  },
+  "id": "4",
+  "question": "Lá cờ của Singapore có bao nhiêu ngôi sao?",
+  "answers": [
+    "A. 5",
+    "B. 3",
+    "C. 7",
+    "D. 1"
+  ],
+  "correctAnswer": 1
+},{
+  "_id": {
+    "$oid": "5f116049b5f875b88848e601"
+  },
+  "id": "5",
+  "question": "Miley Cyrus và Liam Hemsworth có hình xăm chung nào sau đây?",
+  "answers": [
+    "A. The Beatles",
+    "B. Cảnh núi Fuji (Phú Sĩ) ở Nhật Bản",
+    "C. Cảnh 2 người ngồi trong quán Starbuck",
+    "D. Câu nói của Teddy Roosevelt"
+  ],
+  "correctAnswer": 4
+},{
+  "_id": {
+    "$oid": "5f11604db5f875b88848e602"
+  },
+  "id": "6",
+  "question": "MV bài hát nào trên Youtube của Blackpink có nhiều view nhất?",
+  "answers": [
+    "A. DDU-DU DDU-DU",
+    "B. Kill This Love",
+    "C. BOOMBAYAH",
+    "D. How You Like That"
+  ],
+  "correctAnswer": 1
+},{
+  "_id": {
+    "$oid": "5f116050b5f875b88848e603"
+  },
+  "id": "7",
+  "question": "Cuốn sách nào sau đây viết về tổng thống Mỹ Donald Trump?",
+  "answers": [
+    "A. The art of the president",
+    "B. The art of the businessman",
+    "C. The art of the billionaire",
+    "D. The art of the deal"
+  ],
+  "correctAnswer": 4
+},{
+  "_id": {
+    "$oid": "5f1161cab5f875b88848e604"
+  },
+  "id": "8",
+  "question": "Từ viết tắt nào sau đây là tên của một trường/ngành tại NTU?",
+  "answers": [
+    "A. SSM",
+    "B. STS",
+    "C. MBE",
+    "D. NIE"
+  ],
+  "correctAnswer": 1
+},{
+  "_id": {
+    "$oid": "5f11620db5f875b88848e605"
+  },
+  "id": "9",
+  "question": "Từ hay cụm từ nào sau đây không có trong tiếng Việt?",
+  "answers": [
+    "A. Đăng đăng đê đê",
+    "B. bệ vệ",
+    "C. côi cút",
+    "D. náo niền"
+  ],
+  "correctAnswer": 4
+},{
+  "_id": {
+    "$oid": "5f11623cb5f875b88848e606"
+  },
+  "id": "10",
+  "question": "NTU có bao nhiêu cổng vào?",
+  "answers": [
+    "A. 4",
+    "B. 3",
+    "C. 2",
+    "D. 1"
+  ],
+  "correctAnswer": 3
+},{
+  "_id": {
+    "$oid": "5f11627ab5f875b88848e607"
+  },
+  "id": "11",
+  "question": "Fun fact nào về người nổi tiếng sau đây là sai sự thật?",
+  "answers": [
+    "A. Justin Bieber có thể tung hứng (juggle)",
+    "B. Scarlet Johansson từng tham gia vòng thử vai (audition) của Masterchef nhưng không đạt",
+    "C. Lady Gaga từng thuê chuyên gia đến để  bắt 1 con ma tên Ryan",
+    "D. Tên lúc sinh ra của Miley Cyrus là Destiny Hope Cyrus"
+  ],
+  "correctAnswer": 2
+},{
+  "_id": {
+    "$oid": "5f1162c3b5f875b88848e608"
+  },
+  "id": "12",
+  "question": "Có bao nhiêu trạm MRT đang được vận hành ở Singapore?",
+  "answers": [
+    "A. 187",
+    "B. 122",
+    "C. 96",
+    "D. 145"
+  ],
+  "correctAnswer": 2
+},{
+  "_id": {
+    "$oid": "5f1162f4b5f875b88848e609"
+  },
+  "id": "13",
+  "question": "Cửa hàng bán trà sữa nào có ở NTU?",
+  "answers": [
+    "A. Liho",
+    "B. Koi The'",
+    "C. Gongcha",
+    "D. The Alley"
+  ],
+  "correctAnswer": 1
+},{
+  "_id": {
+    "$oid": "5f11632bb5f875b88848e60a"
+  },
+  "id": "14",
+  "question": "Tên thật của Linh Ka là gì?",
+  "answers": [
+    "A. Nguyễn Thị Thuỳ Linh",
+    "B. Nguyễn Ngọc Linh",
+    "C. Chu Diệu Linh",
+    "D. Hoàng Thuỳ Linh"
+  ],
+  "correctAnswer": 3
+},{
+  "_id": {
+    "$oid": "5f116368b5f875b88848e60b"
+  },
+  "id": "15",
+  "question": "Cung Hoàng Đạo của Bác Hồ là gì?",
+  "answers": [
+    "A. Song Ngư",
+    "B. Kim Ngưu",
+    "C. Song Tử",
+    "D. Thiên Bình"
+  ],
+  "correctAnswer": 2
+},{
+  "_id": {
+    "$oid": "5f11639db5f875b88848e60c"
+  },
+  "id": "16",
+  "question": "Giả sử ta có 1 khúc vải, cắt nó ra làm 100 khúc, thời gian để cắt 1 khúc vải là 5 giây. Hỏi nếu cắt liên tục không ngừng nghỉ thì trong bao lâu sẽ cắt xong?",
+  "answers": [
+    "A. 495 giây",
+    "B. 500 giây",
+    "C. 490 giây",
+    "D. 505 giây"
+  ],
+  "correctAnswer": 1
+}]

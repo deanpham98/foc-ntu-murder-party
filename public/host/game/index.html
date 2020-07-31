@@ -7,24 +7,38 @@
         <link href="https://fonts.googleapis.com/css?family=Tajawal" rel="stylesheet">
     </head>
     <body style="font-family: 'Raleway', sans-serif;">
-        <div id = "questionContext">
-            <div id="playersStats">
-                <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">To-Kill-List</h2>
-                <hr style="border:3px solid #f1f1f1">
-                <ul id="playersNameValue" style="font-size: 16px;"></ul>
-                <hr style="border:3px solid #f1f1f1">
+        <script src = "./js/disableInspect.js"></script>
+        <div id="interrogationFloor">
+            <div id = "questionContext">
+                <div id="playersStats">
+                    <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">To-Kill-List</h2>
+                    <hr style="border:3px solid #f1f1f1">
+                    <ul id="playersNameValue" style="font-size: 16px; font-weight: 800;"></ul>
+                    <hr style="border:3px solid #f1f1f1">
+                </div>
+                
+                <h2 id = "questionNum" style="margin-top: 12px; margin-bottom: 12px;"></h2>
+                <h3 id = "playersAnswered" style="margin-top: 12px; margin-bottom: 12px;"></h3>
+                <h3 id = "timerText" style="margin-top: 12px; margin-bottom: 12px;">Time Left:<span id = "num"> 20</span></h3>
             </div>
-            
-            <h2 id = "questionNum" style="margin-top: 12px; margin-bottom: 12px;"></h2>
-            <h3 id = "playersAnswered" style="margin-top: 12px; margin-bottom: 12px;"></h3>
-            <h3 id = "timerText" style="margin-top: 12px; margin-bottom: 12px;">Time Left:<span id = "num"> 20</span></h3>
+            <div id="questionData">
+                <h3 id = "question">Question</h3>
+                <h4 id = "answer1" class = "answer">Answer</h4>
+                <br>
+                <h4 id = "answer2" class = "answer">Answer</h4>
+                <br>
+                <h4 id = "answer3" class = "answer">Answer</h4>
+                <br>
+                <h4 id = "answer4" class = "answer">Answer</h4>
+                <br>
+            </div>
         </div>
-            
+             
         <div id = "killingFloor">
             <div id = "killingFloorPlayers">
                 <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">Killing Floor Players</h2>
                 <hr style="border:3px solid #f1f1f1">
-                <ul id = "challengeNameValue"  style="font-size: 16px;">
+                <ul id = "challengeNameValue"  style="font-size: 16px; font-weight: 800;">
 
                 </ul>
                 <hr style="border:3px solid #f1f1f1">
@@ -56,7 +70,14 @@
             </div>
             <div id = "challenge4">
                 <img src="../../media/challenge4.jpeg" alt="Password" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
-                <h1 id="password" style="text-align:center; font-size: 50px;"></h1>
+                <div id="pwd" style="display: none;">
+                    <h2 style="text-align: center;">Hack This Life</h2>
+                    <div id="password" style="text-align:center;font-size: 50px;font-weight: 1000;width: 200px;margin-left: auto;margin-right: auto;padding-top: 9px;padding-bottom: 10px;border:  solid;margin-bottom: 20px;"></div>
+                </div>
+                <div id = "guessList" style="display: none; text-align: center;">
+                    <h2>Murder Attempts</h2>
+                    <textarea style = "width: 400px; height: 300px" readonly id="guesses"></textarea>
+                </div>
             </div>
             <div id = "challenge5">
                 <img src="../../media/challenge5.jpg" alt="Money" style="margin-left: auto; margin-right: auto; display: block; height: 300px">
@@ -174,33 +195,113 @@
                 </div>
             </div>
             <div id = "challenge10">
-                
+                <img src="../../media/challenge10.png" alt="ABCD" style="margin-left: auto; margin-right: auto; display: block; height: 300px;">
             </div>
             <div id = "challenge11">
-                
+                <div id="blackCard">
+                    <p>During __________ </p>
+                    <p>I think of my mom.</p>
+                </div>
+                <div id="whiteCards" class="flex-container" style="justify-content: space-evenly;">
+                    
+                </div>
             </div>
-
+            <div id = "challenge12">
+                <img src="../../media/challenge12.jpg" alt="DetectivePikachu" style="margin-left: auto; margin-right: auto; display: none; height: 300px;">
+                <button id = "killButton" onclick = "challengeTwelveKill(true)" style="margin-top: 25px;">Kill</button>
+                <button id = "notKillButton" onclick = "challengeTwelveKill(false)" style="margin-top: 25px;">Spare</button>
+            </div>
             <div id = "waitList" style="display: none; text-align: center;">
                 <h2>Waiting For</h2>
                 <textarea style = "width: 300px; height: 200px" readonly id="killingFloorWait"></textarea>
             </div>
             <button id = "startKillingButton" onclick = "handleStartKillingClick()" style="margin-top: 25px;">Start Killing</button>
         </div>
-        
-        <div id="questionData">
-            <h3 id = "question">Question</h3>
-            <h4 id = "answer1" class = "answer">Answer</h4>
-            <br>
-            <h4 id = "answer2" class = "answer">Answer</h4>
-            <br>
-            <h4 id = "answer3" class = "answer">Answer</h4>
-            <br>
-            <h4 id = "answer4" class = "answer">Answer</h4>
-            <br>
+
+        <div id="breakoutFloor">
+            <img src="../../media/breakoutFloor.png" id="breakoutBackground">
+            <div id="charList">
+                
+            </div>
+            <div id="darkness">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <img src="../../media/exit.png" style="position:absolute;width: 100px;right: 0;top: 0px;">
+            <div id="breakoutQuestionData">
+                <img src="../../media/cardboard.jpg" alt="Question Background" style="position: absolute;width: 117%;">
+                <div id="breakoutQuestion" style="
+                    position: absolute;
+                    left: 220px;
+                    top: 220px;
+                    width: fit-content;
+                ">Question</div>
+                <div id="breakoutAnswer1" style="
+                    left: 220px;
+                    top: 274px;
+                    position: absolute;
+                    width: 445px;
+                ">A. Answer 1</div>
+                <div id="breakoutAnswer2" style="
+                    position:  absolute;
+                    left: 220px;
+                    top: 327px;
+                    width: 445px;
+                ">B. Answer 2</div>
+                <div id="breakoutAnswer3" style="
+                    position: absolute;
+                    left: 220px;
+                    top: 388px;
+                    width: 445px;
+                ">C. Answer 3</div>
+                <div id="nextBreakoutQButton" class="arrow" onclick="nextBreakoutGuide(1)"></div>
+                <div id="breakoutTimer">
+                    <div class="base-timer">
+                        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <g class="base-timer__circle">
+                            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+                            <path
+                                id="base-timer-path-remaining"
+                                stroke-dasharray="283"
+                                class="base-timer__path-remaining red"
+                                d="
+                                M 50, 50
+                                m -45, 0
+                                a 45,45 0 1,0 90,0
+                                a 45,45 0 1,0 -90,0
+                                "
+                            ></path>
+                            </g>
+                        </svg>
+                        <span id="base-timer-label" class="base-timer__label">10</span>
+                    </div>
+                </div>
+                
+            </div>
+            
         </div>
         <div id="navigation">
-            <button onclick = "nextQuestion()" id = "nextQButton" style="position: absolute; left: 40%; bottom: 15px">Next Question</button>
-            <button onclick = "killingFloor()" id = "killingFButton" style="position: absolute; left: 40%; bottom: 15px">Killing Floor ^^</button>
+            <button onclick = "nextQuestion()" id = "nextQButton" style="margin-top: 20px">Next Question</button>
+            <button onclick = "killingFloor()" id = "killingFButton" style="margin-top: 20px">Killing Floor ^^</button>
         </div>
         <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>
