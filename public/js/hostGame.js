@@ -7,7 +7,6 @@ var killingFloorPlayers;
 var allPlayers;
 var wait;
 var questionNum = 1;
-let myWindow;
 let leftPos = {
     2: [4, 0],
     3: [6, 2, 0],
@@ -20,16 +19,23 @@ let leftPos = {
     10: [9, 4, 3, 2, 2, 1, 1, 0, 0, 0]
 }
 const FULL_DASH_ARRAY = 283;
-const TIME_LIMIT = 15;
+const TIME_LIMIT = 10;
 
 let breakoutData;
-let timePassed = 0;
+let timePassed = -1;
 let timeLeft = TIME_LIMIT;
 let timerInterval = null;
 let breakoutCorrects;
 let aliveIdx;
 let bestDeadIdx;
 let maxStep;
+var canvas = document.getElementById('whiteboard');
+let context = canvas.getContext('2d');
+
+let current = {
+    color: 'black'
+};
+let drawing = false;
 //When host connects to server
 socket.on('connect', function () {
 
@@ -37,11 +43,67 @@ socket.on('connect', function () {
     socket.emit('host-join-game', params);
 });
 
+socket.on("removePlayersFromBreakout", function(names) {
+    for (let name of names) {
+        if (breakoutData[name].isAlive) {
+            aliveIdx = bestDeadIdx;
+            breakoutData[aliveIdx].isAlive = true;
+            bestDeadIdx = -1;
+            maxStep = 0;
+            breakoutData.forEach((player, idx) => {
+                if (!player.isAlive) {
+                    breakoutData[idx].step += playersCorrects[player.name].filter(x => x).length;
+                    if (breakoutData[idx].step > maxStep) {
+                        bestDeadIdx = idx;
+                        maxStep = breakoutData[idx].step;
+                    }
+                }
+            });
+        }
+        delete breakoutData[name];
+    }
+
+    for (let name of names) {
+        document.getElementById(`${name}Char`).remove();
+    }
+
+    if (timePassed != -1) {
+        startTimer();
+    }
+});
+
+socket.on("removePlayersNotFromBreakout", function(names) {
+    document.getElementById("playersNameValue").innerHTML = [...document.getElementById("playersNameValue").children].filter(elem => !names.includes(elem.firstElementChild.innerText)).map(elem => elem.outerHTML).join("");
+    allPlayers = allPlayers.filter(p => !(names.includes(p)));
+});
+
 socket.on("allPlayers", function(players) {
     allPlayers = players;
     document.getElementById("playersNameValue").innerHTML = allPlayers.map(function(name) {
         return `<li><div id=${name}Game style="text-align: center;">${name}</div><div id="${name}GameValue" style="text-align: center;">0</div></li>`;
     }).join("");
+});
+
+socket.on("playerDisconnect", function(name) {
+    clearInterval(timer);
+    clearInterval(timerInterval);
+    let elem = document.getElementById("disconnectedPlayers");
+    if (elem.innerText == "") {
+        elem.innerText = name;
+    } else {
+        elem.innerText += `, ${name}`;
+    }
+    document.getElementById("id01").style.display = "grid";
+});
+
+function killDisconnectedPlayer() {
+    document.getElementById("id01").style.display = "none";
+    socket.emit("hostKillDisconnectedPlayers");
+    document.getElementById("disconnectedPlayers").innerText = "";
+}
+
+socket.on("hostContinue", function() {
+    document.getElementById()
 });
 
 socket.on('noGameFound', function () {
@@ -59,11 +121,16 @@ socket.on('gameQuestions', function (data) {
     document.getElementById('answer4').innerText = data.a4;
     document.getElementById("questionNum").innerText = `Question ${questionNum}`;
     document.getElementById('playersAnswered').innerText = "Players Answered 0 / " + data.playersInGame;
-    updateTimer();
+    updateTimer(20);
 });
 
 socket.on('updatePlayersAnswered', function (data) {
     document.getElementById('playersAnswered').innerHTML = `Players Answered ${data.playersAnswered} / ${data.playersInGame}`;
+});
+
+socket.on("interrogationChangeButton", function() {
+    document.getElementById("killingFButton").style.display = "none";
+    document.getElementById("nextQButton").style.display = "block";
 });
 
 socket.on('questionOverHost', function (correct, isNextQuestion) {
@@ -127,8 +194,8 @@ function killingFloor() {
     socket.emit('killingFloor'); //Tell server to start new question
 }
 
-function updateTimer() {
-    time = 20;
+function updateTimer(myTime) {
+    time = myTime;
     timer = setInterval(function () {
         time -= 1;
         document.getElementById('num').textContent = " " + time;
@@ -139,8 +206,8 @@ function updateTimer() {
     }, 1000);
 }
 
-function killingUpdateTimer(time) {
-    time++;
+function killingUpdateTimer(myTime) {
+    time = myTime;
     timer = setInterval(function () {
         time--;
         document.getElementById('killingNum').textContent = " " + time;
@@ -148,23 +215,28 @@ function killingUpdateTimer(time) {
             clearInterval(timer);
             document.getElementById("challengeContext").style.display = "none";
             socket.emit('killingTimeUp');
-            document.getElementById("nextQButton").style.display = "block";
+            if (challengeData.id != 12) {
+                alert("Time is up!!!");
+                document.getElementById("nextQButton").style.display = "block";
+            }
         }
     }, 1000);
 }
 
-function challengeTwelveKill(isTrue) {
-    myWindow.close();
-    socket.emit("challenge12Stop", isTrue);
-    if (isTrue) {
-        deads++;
-        document.getElementById(`${killingFloorPlayers[0]}ChallengeValue`).innerText = "Ghost";
-        document.getElementById(`${killingFloorPlayers[0]}Game`).innerText += " 💀"
-    }
-    document.getElementById("killButton").style.display = "none";
-    document.getElementById("notKillButton").style.display = "none";
-    document.getElementById("nextQButton").style.display = "block";
-}
+socket.on("showInstruction", function(ins, src){
+    document.getElementById("details").innerText = ins;
+    document.getElementById("screenshot").src = src;
+});
+
+socket.on("displayInstruction", function() {
+    document.getElementById("instruction").style.display = "block";
+});
+
+socket.on("closeInstruction", function() {
+    document.getElementById("instruction").innerText = "";
+    document.getElementById("screenshot").src = "";
+    document.getElementById("instruction").style.display = "none";
+});
 
 socket.on('nextKillingFloor', function (data, players) {
     challengeData = data;
@@ -249,26 +321,30 @@ function handleStartKillingClick() {
     } else if (challengeData.id == 11) {
         socket.emit("challenge11DisplayImpress");
     } else if (challengeData.id == 12) {
-        socket.emit("challenge12Start", "https://aggie.io/m3jgtkc_ot");
-        myWindow = window.open("https://aggie.io/m3jgtkc_ot");
-        document.getElementById("killButton").style.display = "block";
-        document.getElementById("notKillButton").style.display = "block";
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById("whiteboard").style.cursor = "none";
+        socket.emit("challenge12Start");
     }
 
-    if (challengeData.id != 12) {
-        document.getElementById("killingTimerText").style.display = "block";
-        killingUpdateTimer(20);
-    }
+    document.getElementById("killingTimerText").style.display = "block";
+    killingUpdateTimer(20);
 }
+
+socket.on("setColor", function(hostColor) {
+    current.color = hostColor;
+});
 
 socket.on("updateChallengeValues", function(data) {
     for (let { name, value } of data) {
-        document.getElementById(`${name}ChallengeValue`).innerText = (challengeData.id == 2 && value == "Ghost") ? document.getElementById(`${name}ChallengeValue`).innerText + ` (${value})` : value;
+        document.getElementById(`${name}ChallengeValue`).innerHTML = (challengeData.id == 2 && value == "Ghost") ? document.getElementById(`${name}ChallengeValue`).innerText + ` (${value})` : value;
     }
 });
 
 socket.on("challengeOverHost", function(challengeDeadPlayers) {
     clearInterval(timer);
+    if (challengeData.id == 12) {
+        document.getElementById("whiteboard").style.cursor = "default";
+    }
     for (let player of allPlayers) {
         if (challengeDeadPlayers.includes(player)) {
             document.getElementById(`${player}Game`).innerText += " 💀"
@@ -278,10 +354,25 @@ socket.on("challengeOverHost", function(challengeDeadPlayers) {
     document.getElementById("nextQButton").style.display = "block";
 });
 
+socket.on("challengeOverHostDisconnect", function(names) {
+    clearInterval(timer);
+    document.getElementById("challengeContext").style.display = "none";
+    document.getElementById("killingFloorWait").value = "";
+    document.getElementById("waitList").style.display = "none";
+    document.getElementById("startKillingButton").style.display = "none";
+    document.getElementById(`challenge${challengeData.id}`).style.display = "none";
+    document.getElementById("challengeNameValue").innerHTML = [...document.getElementById("challengeNameValue").children].filter(elem => (!(names.includes(elem.firstElementChild.innerText)))).map(elem => elem.outerHTML).join("");
+    document.getElementById("nextQButton").style.display = "block";
+});
+
+socket.on("continueInterrogation", function() {
+    updateTimer(time);
+});
+
 socket.on("challengeThreeShowPoisons", function(poisons) {
     let skulls = document.getElementById("skull-wrapper").children;
     for (let i = 0; i < 8; i++) {
-        if (poisons[i]) {
+        if (poisons[i])  {
             skulls[i].style.visibility = "visible";
         }
     }
@@ -440,7 +531,7 @@ function startTimer() {
         setCircleDasharray();
     
         if (timeLeft === 0) {
-            timePassed = 0;
+            timePassed = -1;
             onTimesUp();
         }
     }, 1000);
@@ -468,14 +559,14 @@ function nextBreakoutQuestion() {
 function nextBreakoutGuide(guide) {
     switch(guide) {
         case 1:
-            breakoutData[0].step = leftPos[allPlayers.length][0];
-            document.getElementById(`${breakoutData[0].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][0] + 2}px)`;
+            breakoutData[0].step = leftPos[breakoutData.length][0];
+            document.getElementById(`${breakoutData[0].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][0] + 4}px)`;
             document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutGuide(2);
             break;
         case 2:
             for (let i = 1; i < allPlayers.length; i++) {
-                breakoutData[i].step = leftPos[allPlayers.length][i];
-                document.getElementById(`${breakoutData[i].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][i] + 2}px)`;
+                breakoutData[i].step = leftPos[breakoutData.length][i];
+                document.getElementById(`${breakoutData[i].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][i] + 4}px)`;
                 document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutQuestion();
             }
             break;
@@ -500,38 +591,57 @@ socket.on("breakoutQuestionData", function(data) {
 socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
     bestDeadIdx = -1;
     maxStep = 0;
-
+    document.getElementById("breakoutQuestionData").style.display = "none";
+    await(sleep(1500));
+    console.log("remove breakoutquestiondata");
     for (let name in playersCorrects) {
         if (name == breakoutData[aliveIdx].name) {
             playersCorrects[name].pop();
         }
         document.getElementById(`${name}Char`).lastElementChild.innerText = playersCorrects[name].map(isTrue => isTrue ? "✅" : "❌").join(" ");
     }
-    await(sleep(3000));
+
+    console.log("right wrong confirm");
+
+    await(sleep(1500));
     for (let name in playersCorrects) {
         document.getElementById(`${name}Char`).lastElementChild.innerText = "";
     }
-    document.getElementById("breakoutQuestionData").style.display = "none";
-    breakoutData[aliveIdx].step += playersCorrects[breakoutData[aliveIdx].name].filter(x => x).length;
-    document.getElementById(`${breakoutData[aliveIdx].name}Char`).style.transform = `translateX(${71 * breakoutData[aliveIdx].step + 2}px)`;
-    await(sleep(2000));
     
-    if (breakoutData[aliveIdx].step >= 20) {
+    if (playersCorrects[breakoutData[aliveIdx].name].filter(x => x).length > 0) {
+        breakoutData[aliveIdx].step += playersCorrects[breakoutData[aliveIdx].name].filter(x => x).length;
+        document.getElementById(`${breakoutData[aliveIdx].name}Char`).style.transform = `translateX(${71 * breakoutData[aliveIdx].step + 4}px)`;
+        await(sleep(1500));
+    }
+
+    console.log("move first place player");
+    
+    if (breakoutData[aliveIdx].step >= 21) {
+        document.getElementById(`${breakoutData[aliveIdx].name}Char`).style.display = "none";
+        breakoutData.forEach((p, idx) => {
+            if (idx != aliveIdx) {
+                socket.emit("breakoutKillPlayer", breakoutData[idx].playerId, breakoutData[idx].score);
+            }
+        });
+        for (let i = (breakoutQuesNum - 2) * 3; i < 21; i++) {
+            document.getElementById("darkness").children[i].style.backgroundColor = "black";
+            await(sleep(700));
+        }
         socket.emit("gameOver", breakoutData[aliveIdx].playerId);
         document.getElementById("breakoutFloor").style.display = "none";
-        document.getElementById("gameOver").innerText = `Game Over. ${breakoutData[aliveIdx].name} win!!!`;
-        document.getElementById("gameOver").style.display = "block";
     } else {
         breakoutData.forEach((player, idx) => {
             if (!player.isAlive) {
                 breakoutData[idx].step += playersCorrects[player.name].filter(x => x).length;
                 if (breakoutData[idx].step > maxStep) {
                     bestDeadIdx = idx;
+                    maxStep = breakoutData[idx].step;
                 }
-                document.getElementById(`${player.name}Char`).style.transform = `translateX(${71 * player.step + 2}px)`;
+                document.getElementById(`${player.name}Char`).style.transform = `translateX(${71 * player.step + 4}px)`;
             }
         });
         await(sleep(1500));
+        console.log("move the rest");
         if (breakoutData[bestDeadIdx].step >= breakoutData[aliveIdx].step) {
             breakoutData[aliveIdx].isAlive = false;
             document.getElementById(`${breakoutData[aliveIdx].name}Char`).children[1].style.opacity = 0.2;
@@ -540,38 +650,152 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
             for (let i = 0; i < breakoutData.length; i++) {
                 if (i != bestDeadIdx && breakoutData[i].step == breakoutData[bestDeadIdx].step) {
                     breakoutData[i].step--;
-                    document.getElementById(`${breakoutData[i].name}Char`).style.transform = `translateX(${71 * breakoutData[i].step + 2}px)`;
+                    document.getElementById(`${breakoutData[i].name}Char`).style.transform = `translateX(${71 * breakoutData[i].step + 4}px)`;
                 }
             }
             socket.emit("swapLife", breakoutData[aliveIdx].playerId, breakoutData[bestDeadIdx].playerId)
             aliveIdx = bestDeadIdx;
-            if (breakoutData[aliveIdx].step >= 20) {
+            if (breakoutData[aliveIdx].step >= 21) {
+                document.getElementById(`${breakoutData[aliveIdx].name}Char`).style.display = "none";
+                breakoutData.forEach((p, idx) => {
+                    if (idx != aliveIdx) {
+                        socket.emit("breakoutKillPlayer", breakoutData[idx].playerId, breakoutData[idx].score);
+                    }
+                });
+                for (let i = (breakoutQuesNum - 2) * 3; i < 21; i++) {
+                    document.getElementById("darkness").children[i].style.backgroundColor = "black";
+                    await(sleep(700));
+                }
                 socket.emit("gameOver", breakoutData[aliveIdx].playerId);
                 document.getElementById("breakoutFloor").style.display = "none";
-                document.getElementById("gameOver").innerText = `Game Over. ${breakoutData[aliveIdx].name} win!!!`;
-                document.getElementById("gameOver").style.display = "block";
             }
         }
     
-        await(sleep(1500));
+        await(sleep(1000));
+        console.log("swap life if applicable");
         if (breakoutQuesNum >= 2) {
-            document.getElementById("darkness").children[(breakoutQuesNum - 2) * 2].style.backgroundColor = "black";
+            document.getElementById("darkness").children[(breakoutQuesNum - 2) * 3].style.backgroundColor = "black";
             await(sleep(700));
-            document.getElementById("darkness").children[(breakoutQuesNum - 2) * 2 + 1].style.backgroundColor = "black";
+            document.getElementById("darkness").children[(breakoutQuesNum - 2) * 3 + 1].style.backgroundColor = "black";
+            await(sleep(700));
+            document.getElementById("darkness").children[(breakoutQuesNum - 2) * 3 + 2].style.backgroundColor = "black";
         }
     
         for (let i = 0; i < breakoutData.length; i++) {
-            if (2 + 2 * (breakoutQuesNum - 2) >= breakoutData[i].step) {
+            if (2 + 3 * (breakoutQuesNum - 2) >= breakoutData[i].step) {
+                breakoutData[i].isAlive = false;
                 document.getElementById(`${breakoutData[i].name}Char`).style.display = "none";
                 socket.emit("breakoutKillPlayer", breakoutData[i].playerId, breakoutData[i].score);
             }
         }
     }
-    document.getElementById("nextBreakoutQButton").style.display = "block";
-    document.getElementById("breakoutQuestionData").style.display = "block";
-    
+    if (breakoutData.filter(p => p.isAlive == true).length == 0) {
+        socket.emit("gameOver");
+    } else {
+        document.getElementById("nextBreakoutQButton").style.display = "block";
+        document.getElementById("breakoutQuestionData").style.display = "block";
+    }
+});
+
+socket.on("gameOverData", function(data) {
+    breakoutData = data;
+    document.body.style.backgroundColor = "#B0E0E6";
+    document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("ranking").innerHTML = `<thead class="c-table__head"><tr class="c-table__head-row"><th class="c-table__head-cell u-text--center">Place</th><th class="c-table__head-cell">Player</th><th class="c-table__head-cell u-text--right">Score</th></tr></thead>` + breakoutData.map((p, idx) => {
+        return `<tr class="c-table__row"><td class="c-table__cell c-table__cell--place u-text--center">${idx + 1}</td><td class="c-table__cell c-table__cell--name">${p.name} ${p.isAlive ? "😎" : "💀"}</td><td class="c-table__cell c-table__cell--score u-text--right">${p.score}</td></tr>`;
+    }).join("");
+    document.getElementById("gameOver").style.display = "block";
 });
 
 socket.on("breakoutReached", function() {
     document.getElementById("nextQButton").innerText = "Breakout Floor";
 });
+
+// Challenge 12 - Drawing
+(function() { 
+    canvas.addEventListener('mousedown', onMouseDown, false);
+    canvas.addEventListener('mouseup', onMouseUp, false);
+    canvas.addEventListener('mouseout', onMouseUp, false);
+    canvas.addEventListener('mousemove', throttle(onMouseMove, 10), false);
+    
+    //Touch support for mobile devices
+    canvas.addEventListener('touchstart', onMouseDown, false);
+    canvas.addEventListener('touchend', onMouseUp, false);
+    canvas.addEventListener('touchcancel', onMouseUp, false);
+    canvas.addEventListener('touchmove', throttle(onMouseMove, 10), false);
+  
+    socket.on('drawing', onDrawingEvent);
+  
+    window.addEventListener('resize', onResize, false);
+    onResize();
+    function drawLine(x0, y0, x1, y1, color, emit) {
+      context.beginPath();
+      context.moveTo(x0, y0);
+      context.lineTo(x1, y1);
+      context.strokeStyle = color;
+      context.lineWidth = 2;
+      context.stroke();
+      context.closePath();
+  
+      if (!emit) { return; }
+      var w = canvas.width;
+      var h = canvas.height;
+  
+      socket.emit('drawing', {
+        x0: x0 / w,
+        y0: y0 / h,
+        x1: x1 / w,
+        y1: y1 / h,
+        color: color
+      });
+    }
+  
+    function onMouseDown(e){
+      drawing = true;
+      current.x = e.clientX||e.touches[0].clientX;
+      current.y = (e.clientY||e.touches[0].clientY);
+    }
+  
+    function onMouseUp(e){
+      if (!drawing) { return; }
+      drawing = false;
+      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, (e.clientY||e.touches[0].clientY), current.color, true);
+    }
+  
+    function onMouseMove(e){
+      if (!drawing) { return; }
+      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, (e.clientY||e.touches[0].clientY), current.color, true);
+      current.x = e.clientX||e.touches[0].clientX;
+      current.y = (e.clientY||e.touches[0].clientY);
+    }
+  
+    function onColorUpdate(e){
+      current.color = e.target.className.split(' ')[1];
+    }
+  
+    // limit the number of events per second
+    function throttle(callback, delay) {
+      var previousCall = new Date().getTime();
+      return function() {
+        var time = new Date().getTime();
+  
+        if ((time - previousCall) >= delay) {
+          previousCall = time;
+          callback.apply(null, arguments);
+        }
+      };
+    }
+  
+    function onDrawingEvent(data){
+      var w = canvas.width;
+      var h = canvas.height;
+      drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
+    }
+  
+    // make the canvas fill its parent
+    function onResize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+  
+  })();

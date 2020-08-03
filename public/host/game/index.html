@@ -7,14 +7,22 @@
         <link href="https://fonts.googleapis.com/css?family=Tajawal" rel="stylesheet">
     </head>
     <body style="font-family: 'Raleway', sans-serif;">
-        <script src = "./js/disableInspect.js"></script>
+        <!-- <script src = "./js/disableInspect.js"></script> -->
+        <div id="id01" class="w3-modal" style="justify-content: center; align-items: center;">
+            <div class="w3-modal-content">
+                <div class="w3-container">
+                    <p>Disconnected Players: <span id="disconnectedPlayers"></span></p>
+                    <button onclick="killDisconnectedPlayer()" class="w3-button">Kill Disconnected Player</button>
+                </div>
+            </div>
+        </div>
         <div id="interrogationFloor">
             <div id = "questionContext">
                 <div id="playersStats">
                     <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">To-Kill-List</h2>
-                    <hr style="border:3px solid #f1f1f1">
+                    <hr style="border:3px solid grey">
                     <ul id="playersNameValue" style="font-size: 16px; font-weight: 800;"></ul>
-                    <hr style="border:3px solid #f1f1f1">
+                    <hr style="border:3px solid grey">
                 </div>
                 
                 <h2 id = "questionNum" style="margin-top: 12px; margin-bottom: 12px;"></h2>
@@ -37,11 +45,11 @@
         <div id = "killingFloor">
             <div id = "killingFloorPlayers">
                 <h2 style="text-align: center; margin-top: 10px; margin-bottom: 10px;">Killing Floor Players</h2>
-                <hr style="border:3px solid #f1f1f1">
+                <hr style="border:3px solid grey">
                 <ul id = "challengeNameValue"  style="font-size: 16px; font-weight: 800;">
 
                 </ul>
-                <hr style="border:3px solid #f1f1f1">
+                <hr style="border:3px solid grey">
             </div>
 
             <div id = "challengeContext">
@@ -207,9 +215,7 @@
                 </div>
             </div>
             <div id = "challenge12">
-                <img src="../../media/challenge12.jpg" alt="DetectivePikachu" style="margin-left: auto; margin-right: auto; display: none; height: 300px;">
-                <button id = "killButton" onclick = "challengeTwelveKill(true)" style="margin-top: 25px;">Kill</button>
-                <button id = "notKillButton" onclick = "challengeTwelveKill(false)" style="margin-top: 25px;">Spare</button>
+                <canvas id="whiteboard"></canvas>
             </div>
             <div id = "waitList" style="display: none; text-align: center;">
                 <h2>Waiting For</h2>
@@ -299,9 +305,18 @@
             </div>
             
         </div>
+        <div id="instruction">
+            <img src="../../media/cardboard.jpg" alt="Cardboard">
+            <h1 id="details"></h1>
+            <img src="" id="screenshot">
+        </div>
         <div id="navigation">
             <button onclick = "nextQuestion()" id = "nextQButton" style="margin-top: 20px">Next Question</button>
             <button onclick = "killingFloor()" id = "killingFButton" style="margin-top: 20px">Killing Floor ^^</button>
+        </div>
+        <div id="gameOver">
+            <p>GAME OVER</p>
+            <table id="ranking" class="c-table"></table>
         </div>
         <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>

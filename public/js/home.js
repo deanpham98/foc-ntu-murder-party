@@ -6,6 +6,10 @@ socket.on("connect", function() {
     socket.emit("checkHostExist");
 });
 
+document.getElementById("name").oninvalid = () => {
+    alert("Please enter your nickname from 2-6 letters, including only alphabetic characters and numbers");
+};
+
 // socket.on("showHost", function() {
 //     document.getElementById("host").style.display = "block";
 // });

@@ -1,4 +1,4 @@
-window.onbeforeunload = function (e) {
+window.addEventListener("beforeunload",  function (e) {
     e = e || window.event;
 
     if (e) {
@@ -6,4 +6,4 @@ window.onbeforeunload = function (e) {
     }
 
     return 'Are you sure to leave this site?';
-};
+});

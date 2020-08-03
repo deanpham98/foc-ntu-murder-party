@@ -7,7 +7,14 @@
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     </head>
     <body style="font-family: 'Raleway', sans-serif;">
-        <script src = "./js/disableInspect.js"></script>
+        <!-- <script src = "./js/disableInspect.js"></script> -->
+        <div id="id01" class="w3-modal" style="justify-content: center; align-items: center;">
+            <div class="w3-modal-content">
+                <div class="w3-container">
+                    <p>Some Players Are Disconnected. Please Wait!!!</p>
+                </div>
+            </div>
+        </div>
         <div id="interrogationFloor">
             <div id = "stats">
                 <h4 id = "nameText">Name: </h4>
@@ -24,6 +31,7 @@
         </div>
         
         <div id = "killingFloor">
+            <h1 id="killingFloorLookAtHost">Please Look At Host Screen ^^</h1>
             <div id = "challenge1">
                 <form id = "pickNumber">
                     <label for="challenge1Input">Pick a Number</label>
@@ -224,11 +232,19 @@
                 </form>
             </div>
             <div id="challenge12">
-
+                <canvas id="whiteboard" title="Click/Touch to draw"></canvas>
+                <form id="spotMurderer">
+                    <label for="colorPicker">Which Handwritting was of the Murderer???</label>
+                    <select id="colorPicker" onchange="handleChange(this)">
+                        
+                    </select>
+                    
+                    <button onclick="challengeTwelveSpot(); return false;">Submit</button>
+                </form>
             </div>
             <div id = "lifeStatus" style="font-size:30px; color:white; text-align: center; padding: 30px;">
-
             </div>
+            <h1 id="otherPlayerKilled">Challenge Done. Target Killed 👏👏👏</h1>
         </div>
 
         <div id="breakoutFloor">
@@ -244,6 +260,14 @@
                 <input type="checkbox" onclick="handleChecked(this)"/>
                 C. Answer
             </label>
+        </div>
+        <div id="lookAtHost">
+            <h1 id="killingFloorLookAtHost">Please Look At Host Screen ^^</h1>
+        </div>
+        
+        <div id="gameOver">
+            <p>GAME</p>
+            <p>OVER</p>
         </div>
         <script src="../../js/confirmLeave.js"></script>
         <script src = "../../socket.io/socket.io.js"></script>

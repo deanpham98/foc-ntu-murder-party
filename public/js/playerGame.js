@@ -4,11 +4,18 @@ let correct = false;
 let name;
 let score = 0;
 let challengeDone = false;
-let myWindow;
 var isAlive = true;
 var challengeData = {id: 0};
 let uniquePos = new Set();
 let dictionary;
+let isGameOver = false;
+var canvas = document.getElementById('whiteboard');
+let context = canvas.getContext('2d');
+
+let current = {
+    color: 'black'
+};
+let drawing = false;
 
 axios.get("../../files/en_US.aff")
     .then(affData => {
@@ -16,7 +23,7 @@ axios.get("../../files/en_US.aff")
         axios.get("../../files/en_US.dic")
             .then(wordsData => {
                 dictionary = new Typo("en_US", affData.data, wordsData.data);
-            })        
+            })
     })
 
 let params = jQuery.deparam(window.location.search); //Gets the id from url
@@ -26,6 +33,18 @@ socket.on('connect', function() {
     socket.emit('player-join-game', params);
     
     document.getElementById('answerButtons').style.display = "block";
+});
+
+socket.on("playerContinueKillingFloor", function() {
+    document.getElementById(`challenge${challengeData.id}`).style.display = "none";
+});
+
+socket.on("playerDisconnect", function(notUsed) {
+    document.getElementById("id01").style.display = "grid";
+});
+
+socket.on("removePlayersModal", function() {
+    document.getElementById("id01").style.display = "none";
 });
 
 socket.on('noGameFound', function(){
@@ -48,11 +67,7 @@ function answerSubmitted(num){
 
 //Get results on last question
 socket.on('answerResult', function(data){
-    if (data === true) {
-        correct = true;
-    } else {
-        correct = false;
-    }
+    correct = data;
 });
 
 socket.on('questionOverPlayer', function(){
@@ -90,31 +105,39 @@ socket.on('nextQuestionPlayer', function(){
     
 });
 
-socket.on("breakoutFloorPlayer", function() {
+socket.on("breakoutFloorPlayer", function(playerId) {
     document.getElementById("interrogationFloor").style.display = "none";
     document.getElementById("killingFloor").style.display = "none";
+
+    isAlive = (playerId == socket.id);
     document.body.style.backgroundColor = "white";
+    document.getElementById("lookAtHost").style.display = "block";
 });
 
 socket.on("nextBreakoutQuestionPlayer", function(answers) {
-    for (let i = 0; i < 3; i++) {
-        document.getElementById(`label_${i + 1}`).lastChild.nodeValue = answers[i];
-        document.getElementById(`label_${i + 1}`).classList.remove("isSelected");
-        document.getElementById(`label_${i + 1}`).firstElementChild.checked = false;
+    if (isGameOver == false) {
+        for (let i = 0; i < 3; i++) {
+            document.getElementById(`label_${i + 1}`).lastChild.nodeValue = answers[i];
+            document.getElementById(`label_${i + 1}`).classList.remove("isSelected");
+            document.getElementById(`label_${i + 1}`).firstElementChild.checked = false;
+        }
+        document.getElementById("label_3").style.display = isAlive ? "none" : "block";
+        document.getElementById("lookAtHost").style.display = "none";
+        document.getElementById("breakoutFloor").style.display = "block";
     }
-    document.getElementById("label_3").style.display = isAlive ? "none" : "block";
-    document.getElementById("breakoutFloor").style.display = "block";
 });
 
 socket.on("gameOverPlayer", function() {
     document.getElementById("breakoutFloor").style.display = "none";
-    document.getElementById("gameOver").innerText = "You Lost!!!";
+    document.body.style.backgroundColor = "#B0E0E6";
     document.getElementById("gameOver").style.display = "block";
 });
 
 socket.on("youWinPlayer", function() {
     document.getElementById("breakoutFloor").style.display = "none";
-    document.getElementById("gameOver").innerText = "You Win!!!";
+    document.body.style.backgroundColor = "#B0E0E6";
+    document.getElementById("gameOver").children[0].innerText = "YOU";
+    document.getElementById("gameOver").children[1].innerText = "WIN";
     document.getElementById("gameOver").style.display = "block";
 });
 
@@ -124,6 +147,7 @@ socket.on("swapLifePlayer", function() {
 
 socket.on("breakoutTimeupPlayer", function() {
     document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("lookAtHost").style.display = "block";
     let playerAnswers = [];
     for (let i = 1; i <= 3; i++) {
         if (document.getElementById(`label_${i}`).firstElementChild.checked) {
@@ -131,10 +155,6 @@ socket.on("breakoutTimeupPlayer", function() {
         }
     }
     socket.emit("breakoutPlayerAnswer", playerAnswers);
-});
-
-socket.on("breakoutMovePlayer", function() {
-    document.getElementById("breakoutFloor").style.display = "none";
 });
 
 socket.on("clearInterrogation", function() {
@@ -148,18 +168,22 @@ socket.on("clearInterrogation", function() {
 
 socket.on('nextKillingFloorPlayer', function(data){
     challengeData = data;
+    document.getElementById("otherPlayerKilled").style.display = "none";
+    document.getElementById("killingFloorLookAtHost").style.display = "block";
     if (challengeData.id == 2) {
         challengeData.cur = 0;
         document.getElementById("mathQuestion").innerText = challengeData.questions[challengeData.cur].question;
     } else if (challengeData.id == 3) {
         document.getElementById(`challenge${challengeData.id}`).style.display = "block";
         if (!isAlive || correct) {
+            document.getElementById("killingFloorLookAtHost").style.display = "none";
             displayPlayer(false, "block");
             displayPlayer(true, "none");
         }
     } else if ([4, 7, 8, 11].includes(challengeData.id)) {
         document.getElementById(`challenge${challengeData.id}`).style.display = "block";
         if (isAlive && !correct) {
+            document.getElementById("killingFloorLookAtHost").style.display = "none";
             displayPlayer(true, "block");
             displayPlayer(false, "none");
         }
@@ -181,6 +205,7 @@ socket.on('nextKillingFloorPlayer', function(data){
 });
 
 socket.on("startKillingPlayer", function() {
+    document.getElementById("killingFloorLookAtHost").style.display = "none";
     challengeDone = false;
     if (!correct && isAlive) {
         document.getElementById('killingFloor').style.display = "block";
@@ -222,13 +247,6 @@ socket.on('playerGameData', function(data){
            document.getElementById('scoreText').innerHTML = "Score: " + data[i].gameData.score;
        }
    }
-});
-
-socket.on('GameOver', function(){
-    document.body.style.backgroundColor = "#FFFFFF";
-    document.getElementById("answerButtons").style.display = "none";
-    document.getElementById('message').style.display = "block";
-    document.getElementById('message').innerHTML = "GAME OVER";
 });
 
 function challengeOnePickNumber() {
@@ -406,12 +424,23 @@ function displayPlayer(isKillingFloor, disp) {
 
 socket.on("challengeOverPlayer", function(challengeId, value) {
     document.getElementById(`challenge${challengeId}`).style.display = "none";
-    if ((isAlive && !correct) ^ (challengeId == 4 || challengeId == 7)) {
-        if (!challengeDone && isAlive && value != null) {
-            socket.emit(`challenge${challengeId}Submit`, value);
+    if (challengeData.id == 12 && isAlive && !correct) {
+        document.getElementById("challenge12").style.display = "block";
+        document.getElementById("spotMurderer").style.display = "block";
+    } else {    
+        if ((isAlive && !correct) ^ (challengeId == 4 || challengeId == 7)) {
+            if (!challengeDone && isAlive && value != null) {
+                socket.emit(`challenge${challengeId}Submit`, value);
+            }
         }
+        challengeDone = true;
     }
-    challengeDone = true;
+});
+
+socket.on("challengeSinglePlayerOver", function(challengeId) {
+    if (!isAlive || correct) {
+        document.getElementById("otherPlayerKilled").style.display = "block";
+    }
 });
 
 socket.on("playerDisplayLifeStatus", function(deadPlayers) {
@@ -427,30 +456,127 @@ socket.on("playerDisplayLifeStatus", function(deadPlayers) {
     }
 });
 
-socket.on("challengeTwelveStart", function(link) {
-    myWindow = window.open(link);
-});
-
-socket.on("challengeTwelveStop", function(isKill) {
-    myWindow.close();
-    if (isAlive && !correct) {
-        if (isKill) {
-            isAlive = false;
-            document.getElementById("lifeStatus").innerText = "You are now a Ghost 💀";
-            document.getElementById("liveness").innerText = "Life Status: You are a Ghost 💀";
-        } else {
-            document.getElementById("lifeStatus").innerText = "You are lucky this time 😠";
-            document.getElementById("liveness").innerText = "Life Status: You are alive 👌";
-        }
-    }
-});
-
 function handleChecked(elem) {
     elem.parentElement.classList.toggle("isSelected");
 }
 
 socket.on("breakoutKillPlayer", function() {
+    isGameOver = true;
     document.getElementById("breakoutFloor").style.display = "none";
-    document.getElementById("gameOver").innerText = "You Lost!!!";
+    document.getElementById("lookAtHost").style.display = "none";
+    document.body.style.backgroundColor = "#B0E0E6";
     document.getElementById("gameOver").style.display = "block";
 });
+
+// Challenge 12 - Drawing
+(function() { 
+    canvas.addEventListener('mousedown', onMouseDown, false);
+    canvas.addEventListener('mouseup', onMouseUp, false);
+    canvas.addEventListener('mouseout', onMouseUp, false);
+    canvas.addEventListener('mousemove', throttle(onMouseMove, 10), false);
+    
+    //Touch support for mobile devices
+    canvas.addEventListener('touchstart', onMouseDown, false);
+    canvas.addEventListener('touchend', onMouseUp, false);
+    canvas.addEventListener('touchcancel', onMouseUp, false);
+    canvas.addEventListener('touchmove', throttle(onMouseMove, 10), false);
+  
+    socket.on('drawing', onDrawingEvent);
+  
+    window.addEventListener('resize', onResize, false);
+    onResize();
+  
+    function drawLine(x0, y0, x1, y1, color, emit){
+      context.beginPath();
+      context.moveTo(x0, y0);
+      context.lineTo(x1, y1);
+      context.strokeStyle = color;
+      context.lineWidth = 2;
+      context.stroke();
+      context.closePath();
+  
+      if (!emit) { return; }
+      var w = canvas.width;
+      var h = canvas.height;
+  
+      socket.emit('drawing', {
+        x0: x0 / w,
+        y0: y0 / h,
+        x1: x1 / w,
+        y1: y1 / h,
+        color: color
+      });
+    }
+  
+    function onMouseDown(e){
+      drawing = true;
+      current.x = e.clientX||e.touches[0].clientX;
+      current.y = e.clientY||e.touches[0].clientY;
+    }
+  
+    function onMouseUp(e){
+      if (!drawing) { 
+          return; 
+        }
+      drawing = false;
+      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
+    }
+  
+    function onMouseMove(e){
+      if (!drawing) { return; }
+      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
+      current.x = e.clientX||e.touches[0].clientX;
+      current.y = e.clientY||e.touches[0].clientY;
+    }
+  
+    function onColorUpdate(e){
+      current.color = e.target.className.split(' ')[1];
+    }
+  
+    // limit the number of events per second
+    function throttle(callback, delay) {
+      var previousCall = new Date().getTime();
+      return function() {
+        var time = new Date().getTime();
+  
+        if ((time - previousCall) >= delay) {
+          previousCall = time;
+          callback.apply(null, arguments);
+        }
+      };
+    }
+  
+    function onDrawingEvent(data){
+      var w = canvas.width;
+      var h = canvas.height;
+      drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
+    }
+  
+    // make the canvas fill its parent
+    function onResize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+  
+})();
+
+socket.on("challengeTwelveStart", function(colors) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    if (!isAlive || correct) {
+        current.color = colors[socket.id];
+        document.getElementById("whiteboard").style.display = "block";
+    } else {
+        document.getElementById("colorPicker").innerHTML = Object.values(colors).filter(c => c != colors[socket.id]).map(c => {
+            return `<option value="${c}" style="background-color: ${c}"></option>`;
+        }).join("");
+    }
+});
+
+function challengeTwelveSpot() {
+    socket.emit("challenge12Submit", document.getElementById("colorPicker").value);
+    document.getElementById("challenge12").style.display = "none";
+}
+
+function handleChange(elem) {
+    elem.style.backgroundColor = elem.value;
+}

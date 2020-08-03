@@ -7,12 +7,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <script src = "./js/disableInspect.js"></script>
+        <!-- <script src = "./js/disableInspect.js"></script> -->
         <h1 id = "title">Join a Murder Party</h1>
         <form onsubmit="validateName(); return false;">
             <div class="form-field">
                 <label id = "label">Display Name</label>
-                <input id = "name" type = "text" name="name" minlength="2" maxlength="8" required autofocus/>
+                <input id = "name" name="name" pattern="[a-zA-Z0-9]{2,6}" required/>
             </div>
             <br>
             <div class="form-field">
