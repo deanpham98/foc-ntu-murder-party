@@ -184,6 +184,10 @@ form > button {
     color: white;
 }
 
+#otherPlayerKilled {
+    display: none;
+}
+
 #spotMurderer {
     display: none
 }

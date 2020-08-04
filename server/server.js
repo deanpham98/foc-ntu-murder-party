@@ -276,8 +276,8 @@ io.on('connection', (socket) => {
                     
                     disconnectData[player.name] = {
                         floor,
-                        isAlive: floor == "breakout" ? breakoutPlayers[player.name].isAlive : deadPlayers.includes(player.name),
-                        score: floor == "breakout" ? breakoutPlayers[player.name].score : player.gameData.score,
+                        isAlive: floor == "breakout" ? breakoutPlayers.filter(p => p.name == player.name)[0].isAlive : deadPlayers.includes(player.name),
+                        score: floor == "breakout" ? breakoutPlayers.filter(p => p.name == player.name)[0].score : player.gameData.score,
                     };
                     io.to(pin).emit("playerDisconnect", player.name);
                     socket.leave(pin);
@@ -476,6 +476,10 @@ io.on('connection', (socket) => {
         io.to(oldIsAlive).emit("swapLifePlayer");
     });
 
+    socket.on("reverseLife", function(newIsAlive) {
+        io.to(newIsAlive).emit("swapLifePlayer");
+    });
+
     socket.on("breakoutTimeup", function() {
         let game = games.getGame(socket.id);
         io.to(game.pin).emit("breakoutTimeupPlayer");
@@ -560,7 +564,7 @@ io.on('connection', (socket) => {
         MongoClient.connect(url, function(err, db){
             if (err) throw err;
             let query = {
-                // id: 6
+                // id: 1
                 minKillingFloor: { $lte: incorrectPlayer },
                 maxKillingFloor: { $gte: incorrectPlayer },
                 minNonKillingFloor: { $lte: uniqueNames.size - incorrectPlayer },
@@ -1226,10 +1230,9 @@ io.on('connection', (socket) => {
         socket.emit("gameOverData", breakoutPlayers);
     })
 
-    socket.on("breakoutKillPlayer", function(playerId, score) {
+    socket.on("breakoutKillPlayer", function(playerId) {
         for (let i = 0; i < breakoutPlayers.length; i++) {
             if (breakoutPlayers[i].playerId == playerId) {
-                breakoutPlayers[i].score = score;
                 breakoutPlayers[i].isAlive = false;
                 break;
             }

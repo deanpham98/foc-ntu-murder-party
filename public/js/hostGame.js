@@ -31,11 +31,12 @@ let bestDeadIdx;
 let maxStep;
 var canvas = document.getElementById('whiteboard');
 let context = canvas.getContext('2d');
-
+let myFlag = false;
 let current = {
     color: 'black'
 };
 let drawing = false;
+let breakoutSavedData;
 //When host connects to server
 socket.on('connect', function () {
 
@@ -44,30 +45,72 @@ socket.on('connect', function () {
 });
 
 socket.on("removePlayersFromBreakout", function(names) {
+    let flag = false;
+    breakoutData = breakoutSavedData;
+    console.log({
+        ckpt: 1,
+        myFlag,
+        aliveIdx,
+        bestDeadIdx,
+        breakoutData,
+        breakoutSavedData
+    });
     for (let name of names) {
-        if (breakoutData[name].isAlive) {
-            aliveIdx = bestDeadIdx;
-            breakoutData[aliveIdx].isAlive = true;
+        if (breakoutData[aliveIdx].name == name) {
+            flag = true;
             bestDeadIdx = -1;
             maxStep = 0;
+            console.log({
+                ckpt: 2,
+                myFlag,
+                aliveIdx,
+                bestDeadIdx,
+                breakoutData
+            });
             breakoutData.forEach((player, idx) => {
                 if (!player.isAlive) {
-                    breakoutData[idx].step += playersCorrects[player.name].filter(x => x).length;
                     if (breakoutData[idx].step > maxStep) {
                         bestDeadIdx = idx;
                         maxStep = breakoutData[idx].step;
                     }
                 }
             });
+            console.log({
+                ckpt: 3,
+                myFlag,
+                aliveIdx,
+                bestDeadIdx,
+                breakoutData
+            });
+            aliveIdx = bestDeadIdx;
+            breakoutData[aliveIdx].isAlive = true;
+            
         }
-        delete breakoutData[name];
+        breakoutData = breakoutData.filter(p => !(p.name == name));
+        if (breakoutData[aliveIdx].isAlive == false) {
+            aliveIdx--;
+        }
     }
+
+    console.log({
+        ckpt: 4,
+        myFlag,
+        breakoutData,
+        aliveIdx
+    });
 
     for (let name of names) {
-        document.getElementById(`${name}Char`).remove();
+        let elem = document.getElementById(`${name}Char`);
+        if (elem != null)
+            elem.remove();
     }
 
-    if (timePassed != -1) {
+    document.getElementById(`${breakoutData[aliveIdx].name}Char`).children[1].style.opacity = 1;
+    
+    if (flag)
+        socket.emit("reverseLife", breakoutData[aliveIdx].playerId);
+    
+    if (timeLeft > 0) {
         startTimer();
     }
 });
@@ -87,6 +130,12 @@ socket.on("allPlayers", function(players) {
 socket.on("playerDisconnect", function(name) {
     clearInterval(timer);
     clearInterval(timerInterval);
+    console.log({
+        ckpt: 0,
+        breakoutData,
+        aliveIdx
+    });
+    breakoutSavedData = breakoutData;
     let elem = document.getElementById("disconnectedPlayers");
     if (elem.innerText == "") {
         elem.innerText = name;
@@ -503,10 +552,12 @@ socket.on("breakoutFloorHost", function(data) {
                     <div class="right-wrong"></div>
                 </div>`;
     }).join("");
+    bestDeadIdx = 1;
+    maxStep = breakoutData[bestDeadIdx].step;
     document.getElementById("interrogationFloor").style.display = "none";
     document.getElementById("killingFloor").style.display = "none";
     document.getElementById("breakoutFloor").style.display = "block";
-    
+
 });
 
 function onTimesUp() {
@@ -589,6 +640,7 @@ socket.on("breakoutQuestionData", function(data) {
 });
 
 socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
+    myFlag = true;
     bestDeadIdx = -1;
     maxStep = 0;
     document.getElementById("breakoutQuestionData").style.display = "none";
