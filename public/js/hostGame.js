@@ -8,10 +8,10 @@ var allPlayers;
 var wait;
 var questionNum = 1;
 let leftPos = {
-    2: [4, 0],
-    3: [6, 2, 0],
-    4: [7, 3, 2, 0],
-    5: [8, 3, 2, 1, 0],
+    2: [7, 2],
+    3: [7, 2, 0],
+    4: [7, 2, 2, 0],
+    5: [8, 2, 2, 1, 0],
     6: [9, 4, 3, 2, 1, 0],
     7: [9, 4, 3, 2, 1, 0, 0],
     8: [9, 4, 3, 2, 1, 1, 0, 0],
@@ -47,26 +47,13 @@ socket.on('connect', function () {
 socket.on("removePlayersFromBreakout", function(names) {
     let flag = false;
     breakoutData = breakoutSavedData;
-    console.log({
-        ckpt: 1,
-        myFlag,
-        aliveIdx,
-        bestDeadIdx,
-        breakoutData,
-        breakoutSavedData
-    });
+    
     for (let name of names) {
         if (breakoutData[aliveIdx].name == name) {
             flag = true;
             bestDeadIdx = -1;
             maxStep = 0;
-            console.log({
-                ckpt: 2,
-                myFlag,
-                aliveIdx,
-                bestDeadIdx,
-                breakoutData
-            });
+            
             breakoutData.forEach((player, idx) => {
                 if (!player.isAlive) {
                     if (breakoutData[idx].step > maxStep) {
@@ -75,13 +62,7 @@ socket.on("removePlayersFromBreakout", function(names) {
                     }
                 }
             });
-            console.log({
-                ckpt: 3,
-                myFlag,
-                aliveIdx,
-                bestDeadIdx,
-                breakoutData
-            });
+            
             aliveIdx = bestDeadIdx;
             breakoutData[aliveIdx].isAlive = true;
             
@@ -92,23 +73,19 @@ socket.on("removePlayersFromBreakout", function(names) {
         }
     }
 
-    console.log({
-        ckpt: 4,
-        myFlag,
-        breakoutData,
-        aliveIdx
-    });
-
     for (let name of names) {
         let elem = document.getElementById(`${name}Char`);
         if (elem != null)
-            elem.remove();
+            elem.style.display = "none";
     }
 
     document.getElementById(`${breakoutData[aliveIdx].name}Char`).children[1].style.opacity = 1;
     
-    if (flag)
+    if (flag) {
         socket.emit("reverseLife", breakoutData[aliveIdx].playerId);
+        breakoutData[aliveIdx].step++;
+        document.getElementById(`${breakoutData[aliveIdx].name}Char`).children[1].style.transform = `translateX(${71 * breakoutData[aliveIdx].step + 4}px)`;
+    }
     
     if (timeLeft > 0) {
         startTimer();
@@ -116,7 +93,7 @@ socket.on("removePlayersFromBreakout", function(names) {
 });
 
 socket.on("removePlayersNotFromBreakout", function(names) {
-    document.getElementById("playersNameValue").innerHTML = [...document.getElementById("playersNameValue").children].filter(elem => !names.includes(elem.firstElementChild.innerText)).map(elem => elem.outerHTML).join("");
+    document.getElementById("playersNameValue").innerHTML = [...document.getElementById("playersNameValue").children].filter(elem => !names.includes(elem.firstElementChild.id.slice(0, -4))).map(elem => elem.outerHTML).join("");
     allPlayers = allPlayers.filter(p => !(names.includes(p)));
 });
 
@@ -130,11 +107,6 @@ socket.on("allPlayers", function(players) {
 socket.on("playerDisconnect", function(name) {
     clearInterval(timer);
     clearInterval(timerInterval);
-    console.log({
-        ckpt: 0,
-        breakoutData,
-        aliveIdx
-    });
     breakoutSavedData = breakoutData;
     let elem = document.getElementById("disconnectedPlayers");
     if (elem.innerText == "") {
@@ -215,7 +187,7 @@ function sleep(ms) {
 
 function nextQuestion() {
     if (challengeData.id) {
-        document.getElementById(`challenge${challengeData.id}`).style.display = "none";
+        document.getElementById(`challenge${challengeData.id}`).remove();
         document.getElementById("killingFloor").style.display = "none";
     }
     document.getElementById("interrogationFloor").style.display = "block";
@@ -274,17 +246,26 @@ function killingUpdateTimer(myTime) {
 
 socket.on("showInstruction", function(ins, src){
     document.getElementById("details").innerText = ins;
-    document.getElementById("screenshot").src = src;
-});
-
-socket.on("displayInstruction", function() {
+    document.getElementById("screenshots").innerHTML = src.map(s => `<div class="screenshot-image">
+                                                                        <img src="${s}" alt="Screenshot"/>
+                                                                    </div>`).join("");
+    document.getElementById("killingFloor").style.display = "none";
     document.getElementById("instruction").style.display = "block";
 });
 
-socket.on("closeInstruction", function() {
-    document.getElementById("instruction").innerText = "";
-    document.getElementById("screenshot").src = "";
+function nextInstruction() {
+    socket.emit("nextInstruction");
+}
+
+socket.on("closeInstruction", function(isFirstQues, floor) {
+    document.getElementById("details").innerText = "";
+    document.getElementById("screenshots").innerHTML = "";
     document.getElementById("instruction").style.display = "none";
+    if (floor.startsWith("challenge"))
+        document.getElementById("killingFloor").style.display = "block";
+    if (isFirstQues) {
+        socket.emit("firstInterrogationQuestion");
+    }
 });
 
 socket.on('nextKillingFloor', function (data, players) {
@@ -355,7 +336,7 @@ function handleStartKillingClick() {
     socket.emit("startKilling");
 
     if (challengeData.id == 6) {
-        document.getElementById("spellExample").style.display = "none";
+        // document.getElementById("spellExample").style.display = "none";
         document.getElementById("spellReal").style.display = "block";
     } else if (challengeData.id == 8) {
         document.getElementById("skewResult").style.display = "none";
@@ -533,7 +514,6 @@ socket.on("challengeElevenShowResults", function(data) {
 });
 
 socket.on("breakoutFloorHost", function(data) {
-
     let totalPlayers = data.length;
     breakoutData = data;
     let topPos = [];
@@ -557,7 +537,6 @@ socket.on("breakoutFloorHost", function(data) {
     document.getElementById("interrogationFloor").style.display = "none";
     document.getElementById("killingFloor").style.display = "none";
     document.getElementById("breakoutFloor").style.display = "block";
-
 });
 
 function onTimesUp() {
@@ -610,18 +589,20 @@ function nextBreakoutQuestion() {
 function nextBreakoutGuide(guide) {
     switch(guide) {
         case 1:
-            breakoutData[0].step = leftPos[breakoutData.length][0];
-            document.getElementById(`${breakoutData[0].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][0] + 4}px)`;
+            socket.emit("breakoutInstruction");
             document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutGuide(2);
             break;
         case 2:
+            breakoutData[0].step = leftPos[breakoutData.length][0];
+            document.getElementById(`${breakoutData[0].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][0] + 4}px)`;
+            document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutGuide(3);
+            break;
+        case 3:
             for (let i = 1; i < allPlayers.length; i++) {
                 breakoutData[i].step = leftPos[breakoutData.length][i];
                 document.getElementById(`${breakoutData[i].name}Char`).style.transform = `translateX(${71 * leftPos[allPlayers.length][i] + 4}px)`;
-                document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutQuestion();
             }
-            break;
-        default:
+            document.getElementById("nextBreakoutQButton").onclick = () => nextBreakoutQuestion();
             break;
     }
 }
@@ -645,15 +626,12 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
     maxStep = 0;
     document.getElementById("breakoutQuestionData").style.display = "none";
     await(sleep(1500));
-    console.log("remove breakoutquestiondata");
     for (let name in playersCorrects) {
         if (name == breakoutData[aliveIdx].name) {
             playersCorrects[name].pop();
         }
         document.getElementById(`${name}Char`).lastElementChild.innerText = playersCorrects[name].map(isTrue => isTrue ? "✅" : "❌").join(" ");
     }
-
-    console.log("right wrong confirm");
 
     await(sleep(1500));
     for (let name in playersCorrects) {
@@ -666,8 +644,6 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
         await(sleep(1500));
     }
 
-    console.log("move first place player");
-    
     if (breakoutData[aliveIdx].step >= 21) {
         document.getElementById(`${breakoutData[aliveIdx].name}Char`).style.display = "none";
         breakoutData.forEach((p, idx) => {
@@ -693,7 +669,6 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
             }
         });
         await(sleep(1500));
-        console.log("move the rest");
         if (breakoutData[bestDeadIdx].step >= breakoutData[aliveIdx].step) {
             breakoutData[aliveIdx].isAlive = false;
             document.getElementById(`${breakoutData[aliveIdx].name}Char`).children[1].style.opacity = 0.2;
@@ -724,7 +699,16 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
         }
     
         await(sleep(1000));
-        console.log("swap life if applicable");
+        if (breakoutQuesNum == 2) {
+            document.getElementById("details").innerText = "Look to your left!!!";
+            document.getElementById("screenshots").innerHTML = `<img src="../../media/darkness_is_approaching.png" alt="Darkness">`;
+            document.getElementById("nextInstruction").style.display = "none";
+            document.getElementById("instruction").style.display = "block";
+            await(sleep(2000));
+            document.getElementById("instruction").style.display = "none";
+            document.getElementById("nextInstruction").style.display = "block";
+        }
+
         if (breakoutQuesNum >= 2) {
             document.getElementById("darkness").children[(breakoutQuesNum - 2) * 3].style.backgroundColor = "black";
             await(sleep(700));
@@ -732,7 +716,11 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
             await(sleep(700));
             document.getElementById("darkness").children[(breakoutQuesNum - 2) * 3 + 2].style.backgroundColor = "black";
         }
-    
+
+        if (breakoutQuesNum == 4) {
+            document.getElementById("breakoutQuestionData").style.right = "1300px";
+        }
+
         for (let i = 0; i < breakoutData.length; i++) {
             if (2 + 3 * (breakoutQuesNum - 2) >= breakoutData[i].step) {
                 breakoutData[i].isAlive = false;

@@ -15,11 +15,13 @@ document.getElementById("name").oninvalid = () => {
 // });
 
 function validateName() {
-    socket.emit("validateName", name.value);
+    socket.emit("validateName", name.value, pin.value);
 }
 
-socket.on("submitAction", function(isNameExist) {
-    if (isNameExist) {
+socket.on("submitAction", function(isNameExist, isRoomExist) {
+    if (isRoomExist) {
+        alert("Room does not exist");
+    } else if (isNameExist) {
         alert("Player name already exists");
     } else {
         window.location = `/player?name=${name.value}&pin=${pin.value}`;

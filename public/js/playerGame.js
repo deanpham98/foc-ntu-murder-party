@@ -48,14 +48,14 @@ socket.on("removePlayersModal", function() {
 });
 
 socket.on('noGameFound', function(){
-    window.location.href = '../../';//Redirect user to 'join game' page 
+    window.location.href = '../../'; //Redirect user to 'join game' page 
 });
 
 function answerSubmitted(num){
     if(playerAnswered == false){
         playerAnswered = true;
         
-        socket.emit('playerAnswer', num);//Sends player answer to server
+        socket.emit('playerAnswer', num); //Sends player answer to server
         
         //Hiding buttons from user
         document.getElementById("answerButtons").style.display = "none";
@@ -95,6 +95,7 @@ socket.on('newScore', function(data){
 socket.on('nextQuestionPlayer', function(){
     correct = false;
     playerAnswered = false;
+    document.getElementById(`challenge${challengeData.id}`).remove();
     document.getElementById('stats').style.display = "none";
     document.getElementById("lifeStatus").innerText = "";
     document.getElementById("killingFloor").style.display = "none";
@@ -129,11 +130,13 @@ socket.on("nextBreakoutQuestionPlayer", function(answers) {
 
 socket.on("gameOverPlayer", function() {
     document.getElementById("breakoutFloor").style.display = "none";
+    document.getElementById("lookAtHost").style.display = "none";
     document.body.style.backgroundColor = "#B0E0E6";
     document.getElementById("gameOver").style.display = "block";
 });
 
 socket.on("youWinPlayer", function() {
+    document.getElementById("lookAtHost").style.display = "none";
     document.getElementById("breakoutFloor").style.display = "none";
     document.body.style.backgroundColor = "#B0E0E6";
     document.getElementById("gameOver").children[0].innerText = "YOU";
@@ -240,17 +243,16 @@ socket.on('hostDisconnect', function(){
 });
 
 socket.on('playerGameData', function(data){
-   for(let i = 0; i < data.length; i++){
-       if(data[i].playerId == socket.id){
-           name = data[i].name;
-           document.getElementById('nameText').innerHTML = "Name: " + data[i].name;
-           document.getElementById('scoreText').innerHTML = "Score: " + data[i].gameData.score;
-       }
+   for (let i = 0; i < data.length; i++) {
+        if (data[i].playerId == socket.id) {
+            name = data[i].name;
+            document.getElementById('nameText').innerHTML = "Name: " + data[i].name;
+            document.getElementById('scoreText').innerHTML = "Score: " + data[i].gameData.score;
+        }
    }
 });
 
 function challengeOnePickNumber() {
-
     if (document.getElementById("challenge1Input").checkValidity()) {
         challengeDone = true;
         document.getElementById("pickNumber").style.display = "none";
@@ -422,6 +424,14 @@ function displayPlayer(isKillingFloor, disp) {
     Array.from(elems).forEach(elem => elem.style.display = disp);
 }
 
+socket.on("showInstructionPlayer", function() {
+    document.getElementById("id01").firstElementChild.firstElementChild.firstElementChild.innerText = "";
+});
+
+socket.on("closeInstructionPlayer", function() {
+    document.getElementById("id01").firstElementChild.firstElementChild.firstElementChild.innerText = "Some Players Are Disconnected. Please Wait!!!";
+});
+
 socket.on("challengeOverPlayer", function(challengeId, value) {
     document.getElementById(`challenge${challengeId}`).style.display = "none";
     if (challengeData.id == 12 && isAlive && !correct) {
@@ -487,75 +497,75 @@ socket.on("breakoutKillPlayer", function() {
     onResize();
   
     function drawLine(x0, y0, x1, y1, color, emit){
-      context.beginPath();
-      context.moveTo(x0, y0);
-      context.lineTo(x1, y1);
-      context.strokeStyle = color;
-      context.lineWidth = 2;
-      context.stroke();
-      context.closePath();
-  
-      if (!emit) { return; }
-      var w = canvas.width;
-      var h = canvas.height;
-  
-      socket.emit('drawing', {
-        x0: x0 / w,
-        y0: y0 / h,
-        x1: x1 / w,
-        y1: y1 / h,
-        color: color
-      });
+        context.beginPath();
+        context.moveTo(x0, y0);
+        context.lineTo(x1, y1);
+        context.strokeStyle = color;
+        context.lineWidth = 2;
+        context.stroke();
+        context.closePath();
+    
+        if (!emit) { return; }
+        var w = canvas.width;
+        var h = canvas.height;
+    
+        socket.emit('drawing', {
+            x0: x0 / w,
+            y0: y0 / h,
+            x1: x1 / w,
+            y1: y1 / h,
+            color: color
+        });
     }
   
     function onMouseDown(e){
-      drawing = true;
-      current.x = e.clientX||e.touches[0].clientX;
-      current.y = e.clientY||e.touches[0].clientY;
+        drawing = true;
+        current.x = e.clientX||e.touches[0].clientX;
+        current.y = e.clientY||e.touches[0].clientY;
     }
   
     function onMouseUp(e){
-      if (!drawing) { 
-          return; 
+        if (!drawing) { 
+            return; 
         }
-      drawing = false;
-      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
+        drawing = false;
+        drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
     }
   
     function onMouseMove(e){
-      if (!drawing) { return; }
-      drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
-      current.x = e.clientX||e.touches[0].clientX;
-      current.y = e.clientY||e.touches[0].clientY;
+        if (!drawing) { return; }
+        drawLine(current.x, current.y, e.clientX||e.touches[0].clientX, e.clientY||e.touches[0].clientY, current.color, true);
+        current.x = e.clientX||e.touches[0].clientX;
+        current.y = e.clientY||e.touches[0].clientY;
     }
   
     function onColorUpdate(e){
-      current.color = e.target.className.split(' ')[1];
+        current.color = e.target.className.split(' ')[1];
     }
   
     // limit the number of events per second
     function throttle(callback, delay) {
-      var previousCall = new Date().getTime();
-      return function() {
-        var time = new Date().getTime();
-  
-        if ((time - previousCall) >= delay) {
-          previousCall = time;
-          callback.apply(null, arguments);
-        }
-      };
+        var previousCall = new Date().getTime();
+        return function() {
+            var time = new Date().getTime();
+    
+            if ((time - previousCall) >= delay) {
+                previousCall = time;
+                callback.apply(null, arguments);
+            }
+        };
     }
   
     function onDrawingEvent(data){
-      var w = canvas.width;
-      var h = canvas.height;
-      drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
+        var w = canvas.width;
+        var h = canvas.height;
+        drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
     }
   
     // make the canvas fill its parent
     function onResize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
   
 })();

@@ -12,33 +12,30 @@ html, body { height: 100%; padding: 0; margin: 0; }
     background-color: #ff9933;
 }
 
-#buttons{
+button {
     text-align: center;
 }
-#nameText{
+
+#nameText, #scoreText {
     margin-top: 12px;
     margin-bottom: 12px;
     padding: 0px 10px;
 }
-#scoreText{
-    margin-top: 12px;
-    margin-bottom: 12px;
-    padding: 0px 10px;
-}
+
 #message{
     text-align: center;
     font-size: 35px;
 }
 
 #killingFloor {
-    display: none;
     height: 100%;
     background-color: #864cbf;
 }
 
 #challenge1, #stats, #challenge2, #challenge3, #challenge4, #challenge5, #challenge6,
 #challenge7, #challenge8, #challenge9, #challenge10, #challenge11, .killing-floor, .non-killing-floor,
-#takeMoney, #takeNothing {
+#takeMoney, #takeNothing, #message, #killingFloor, #breakoutFloor, #spotMurderer,
+#whiteboard, #gameOver, #lookAtHost, #otherPlayerKilled, .w3-modal {
     display: none
 }
 
@@ -100,14 +97,10 @@ form > button {
 #answerButtons > button {
     width: 50%;
     height: 50%;
-    float: left;
     font-size: 50px;
     color: white;
-    display: inline-block;
-}
-
-#breakoutFloor {
-    display: none;
+    display: block;
+    float: left;
 }
 
 #interrogationFloor, #killingFloor, #breakoutFloor {
@@ -140,7 +133,6 @@ form > button {
 }
   
 #whiteboard {
-    display: none;
     height: 100%;
     width: 100%;
     position: absolute;
@@ -156,8 +148,7 @@ form > button {
 #gameOver {
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
-    display: none;
+    padding-top: 100px;
 }
   
 #gameOver p {
@@ -172,7 +163,6 @@ form > button {
 }
 
 #lookAtHost {
-    display: none;
     height: 100%;
     background-color: #864cbf;
 }
@@ -184,17 +174,8 @@ form > button {
     color: white;
 }
 
-#otherPlayerKilled {
-    display: none;
-}
-
-#spotMurderer {
-    display: none
-}
-
-.w3-modal{
+.w3-modal {
     z-index: 3;
-    display: none;
     padding-top: 100px;
     position: fixed;
     left: 0;
