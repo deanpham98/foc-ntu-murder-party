@@ -95,7 +95,7 @@ socket.on('newScore', function(data){
 socket.on('nextQuestionPlayer', function(){
     correct = false;
     playerAnswered = false;
-    document.getElementById(`challenge${challengeData.id}`).remove();
+    document.getElementById(`challenge${challengeData.id}`).style.display = "none";
     document.getElementById('stats').style.display = "none";
     document.getElementById("lifeStatus").innerText = "";
     document.getElementById("killingFloor").style.display = "none";
