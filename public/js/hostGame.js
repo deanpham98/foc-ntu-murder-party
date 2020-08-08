@@ -187,7 +187,7 @@ function sleep(ms) {
 
 function nextQuestion() {
     if (challengeData.id) {
-        document.getElementById(`challenge${challengeData.id}`).remove();
+        document.getElementById(`challenge${challengeData.id}`).style.display = "none";
         document.getElementById("killingFloor").style.display = "none";
     }
     document.getElementById("interrogationFloor").style.display = "block";
