@@ -555,7 +555,6 @@ io.on('connection', (socket) => {
     socket.on('nextBreakoutQuestion', () => {
         let game = games.getGame(socket.id);
         game.breakoutAllPlayersAnswers = {};
-        console.log(game.questionData);
         if (game.questionData == null) {
             MongoClient.connect(url, function(err, db) {
                 if (err) throw err;
