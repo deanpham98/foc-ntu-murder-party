@@ -141,8 +141,8 @@ io.on('connection', (socket) => {
                     correct: correctAnswer,
                     playersInGame: playerData.length
                 });
-                db.close();
                 io.to(game.pin).emit('gameStartedPlayer');
+                db.close();
                 game.gameData.questionLive = true;
             }); 
         });
@@ -160,7 +160,6 @@ io.on('connection', (socket) => {
             "If you choose these answers, you will move 2 steps",
             "If you choose these answers, you will move 1 step",
             "To move as closer to the Exit door as possible, you must choose the correct answers and must NOT choose the incorrect answers",
-            "Therefore, you can choose more than one answers or nothing at all",
             "There can be no correct answer or more than one correct answers",
             "In this Breakout Floor, a question and three answers will be given within 10 seconds.",
             "If nobody survive when we reach the Breakout Floor, the player with highest score will have that advantage.",
@@ -182,7 +181,6 @@ io.on('connection', (socket) => {
             ["../../media/screenshot_two_correct.png"],
             ["../../media/screenshot_one_correct.png"],
             ["../../media/screenshot_many_correct.png"],
-            [],
             ["../../media/screenshot_no_correct.png", "../../media/screenshot_many_correct.png"],
             ["../../media/screenshot_breakout_questions.png"],
             [],
@@ -265,8 +263,8 @@ io.on('connection', (socket) => {
                 socket.emit("reconnectPlayer", game.disconnectData[player.name]);
                 io.to(player.hostId).emit("reconnectPlayerToHost", player.name, game.disconnectData[player.name]);
                 delete game.disconnectData[player.name];
-                game.challengeData[3].guessCounter = game.uniqueNames.size - 1;
-                game.challengeData[6].guessCounter = game.uniqueNames.size - 1;
+                game.challengeData[3].guessCounter = game.uniqueNames.size + 1;
+                game.challengeData[6].guessCounter = game.uniqueNames.size + 1;
             }
         } else {
             socket.emit('noGameFound');//No player found
@@ -338,7 +336,6 @@ io.on('connection', (socket) => {
         }
 
         game.deadPlayers = game.deadPlayers.filter(p => !(p in game.disconnectData));
-
         socket.emit("removePlayersNotFromBreakout", Object.keys(game.disconnectData));
         if (game.floor == "breakout") {
             game.breakoutPlayers = game.breakoutPlayers.filter(p => !(p.name in game.disconnectData));
@@ -396,7 +393,7 @@ io.on('connection', (socket) => {
                         "The Interrogation Floor and the Killing Floor will alternate until at most 1 person survive",
                         "Anyone who DIE in the Killing Floor still can participate in the next Interrogation Floors and Killing Floors.",
                         "But of course, there will be a disadvantage.",
-                        "If you DIE in the Killing Floor, you can still revive and win this game in the Final Stage.",
+                        "If you DIE in the Killing Floor, you can still revive and win this game in the Final Round.",
                         "If you answer incorrectly, you are not dead yet but you will enter the Killing Floor.",
                         "Each of you can see your own Life Status on your screen",
                         "To be very clear, this game is for me to have fun and for you to DIE.",

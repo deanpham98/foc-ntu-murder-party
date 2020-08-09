@@ -8,10 +8,10 @@ var allPlayers;
 var wait;
 var questionNum = 1;
 let leftPos = {
-    2: [7, 2],
-    3: [7, 2, 0],
-    4: [7, 2, 2, 0],
-    5: [8, 2, 2, 1, 0],
+    2: [8, 3],
+    3: [8, 3, 0],
+    4: [8, 3, 2, 0],
+    5: [8, 3, 2, 1, 0],
     6: [9, 4, 3, 2, 1, 0],
     7: [9, 4, 3, 2, 1, 0, 0],
     8: [9, 4, 3, 2, 1, 1, 0, 0],
@@ -142,7 +142,7 @@ socket.on('gameQuestions', function (data) {
     document.getElementById('answer4').innerText = data.a4;
     document.getElementById("questionNum").innerText = `Question ${questionNum}`;
     document.getElementById('playersAnswered').innerText = "Players Answered 0 / " + data.playersInGame;
-    updateTimer(20);
+    updateTimer(30);
 });
 
 socket.on('updatePlayersAnswered', function (data) {
@@ -357,7 +357,7 @@ function handleStartKillingClick() {
     }
 
     document.getElementById("killingTimerText").style.display = "block";
-    killingUpdateTimer(20);
+    killingUpdateTimer(30);
 }
 
 socket.on("setColor", function(hostColor) {
