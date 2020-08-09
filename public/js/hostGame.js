@@ -624,11 +624,19 @@ socket.on("breakoutMoveHost", async function(playersCorrects, breakoutQuesNum) {
     myFlag = true;
     bestDeadIdx = -1;
     maxStep = 0;
+    if (breakoutQuesNum >= 4) {
+        document.getElementById("exitDoor").style.display = "none";
+    }
     document.getElementById("breakoutQuestionData").style.display = "none";
     await(sleep(1500));
     for (let name in playersCorrects) {
         if (name == breakoutData[aliveIdx].name) {
             playersCorrects[name].pop();
+        }
+        if (breakoutData.filter(p => p.name == name)[0].step >= 19) {
+            document.getElementById(`${name}Char`).lastElementChild.style.left = "-74px";
+        } else {
+            document.getElementById(`${name}Char`).lastElementChild.style.left = "65px";
         }
         document.getElementById(`${name}Char`).lastElementChild.innerText = playersCorrects[name].map(isTrue => isTrue ? "✅" : "❌").join(" ");
     }
