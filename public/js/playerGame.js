@@ -17,10 +17,10 @@ let current = {
 };
 let drawing = false;
 
-axios.get("../../files/en_US.aff")
+axios.get("http://d2575hy9eiu86j.cloudfront.net/files/en_US.aff")
     .then(affData => {
         console.log(affData);
-        axios.get("../../files/en_US.dic")
+        axios.get("http://d2575hy9eiu86j.cloudfront.net/files/en_US.dic")
             .then(wordsData => {
                 dictionary = new Typo("en_US", affData.data, wordsData.data);
             })
